@@ -2,13 +2,18 @@ package provider
 
 import (
 	"context"
-	"net/http"
+	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 
 // Ensure StaxProvider satisfies various provider interfaces.
@@ -30,7 +35,7 @@ type StaxProviderModel struct {
 }
 
 func (p *StaxProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "Stax"
+	resp.TypeName = "stax"
 	resp.Version = p.version
 }
 
@@ -39,15 +44,15 @@ func (p *StaxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 		Attributes: map[string]schema.Attribute{
 			"installation": schema.StringAttribute{
 				MarkdownDescription: "Installation name",
-				Required:            true,
+				Optional:            true,
 			},
 			"api_token_access_key": schema.StringAttribute{
 				MarkdownDescription: "API Token Access Key",
-				Required:            true,
+				Optional:            true,
 			},
 			"api_token_secret_key": schema.StringAttribute{
 				MarkdownDescription: "API Token Secret Key",
-				Required:            true,
+				Optional:            true,
 			},
 		},
 	}
@@ -62,11 +67,42 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
+	if data.Installation.IsNull() {
+		data.Installation = basetypes.NewStringValue(os.Getenv("STAX_INSTALLATION"))
+	}
+
+	if data.APITokenAccessKey.IsNull() {
+		data.APITokenAccessKey = basetypes.NewStringValue(os.Getenv("STAX_ACCESS_KEY"))
+	}
+
+	if data.APITokenSecretKey.IsNull() {
+		data.APITokenSecretKey = basetypes.NewStringValue(os.Getenv("STAX_ACCESS_SECRET"))
+	}
+
+	tflog.Trace(ctx, "connecting to stax API", map[string]interface{}{
+		"installation": data.Installation.String(),
+		"access_key":   data.APITokenAccessKey.String(),
+	})
+
 	// Configuration values are now available.
 	// if data.Endpoint.IsNull() { /* ... */ }
+	apiToken := &auth.APIToken{
+		AccessKey: data.APITokenAccessKey.ValueString(),
+		SecretKey: data.APITokenSecretKey.ValueString(),
+	}
 
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	client, err := staxsdk.NewClient(apiToken, staxsdk.WithInstallation(data.Installation.ValueString()))
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create client, got error: %s", err))
+		return
+	}
+
+	err = client.Authenticate(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to authenticate client, got error: %s", err))
+		return
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -78,7 +114,9 @@ func (p *StaxProvider) Resources(ctx context.Context) []func() resource.Resource
 }
 
 func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewAccountsDataSource,
+	}
 }
 
 func New(version string) func() provider.Provider {

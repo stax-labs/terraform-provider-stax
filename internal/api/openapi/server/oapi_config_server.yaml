@@ -1,0 +1,10 @@
+package: server
+output: stax-server.gen.go
+generate:
+  echo-server: true
+additional-imports:
+    - package: github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models
+      alias: .
+output-options:
+  response-type-suffix: Resp
+  skip-prune: true
