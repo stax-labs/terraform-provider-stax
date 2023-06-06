@@ -23,3 +23,7 @@ provider "stax" {
   api_token_access_key = var.api_token_access_key
   api_token_secret_key = var.api_token_secret_key
 }
+
+output "dedicated_dev_accounts" {
+  value = data.stax_accounts.dedicated_dev
+}

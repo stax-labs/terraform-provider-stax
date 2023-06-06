@@ -36,7 +36,7 @@ func main() {
 
 	opts := providerserver.ServeOpts{
 		// TODO: Update this string with the published name of your provider.
-		Address: "app.terraform.io/stax-cloud/stax",
+		Address: "registry.terraform.io/stax/stax",
 		Debug:   debug,
 	}
 
