@@ -1,0 +1,11 @@
+package: client
+output: stax-client.gen.go
+generate:
+  client: true
+  models: false
+additional-imports:
+    - package: github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models
+      alias: .
+output-options:
+  response-type-suffix: Resp
+  skip-prune: true

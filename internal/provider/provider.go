@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/stax-labs/stax-golang-sdk/pkg/auth"
-	"github.com/stax-labs/stax-golang-sdk/pkg/staxsdk"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 
 // Ensure StaxProvider satisfies various provider interfaces.

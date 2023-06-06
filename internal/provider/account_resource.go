@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/stax-labs/stax-golang-sdk/pkg/openapi/client"
-	"github.com/stax-labs/stax-golang-sdk/pkg/openapi/models"
-	"github.com/stax-labs/stax-golang-sdk/pkg/staxsdk"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/client"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.

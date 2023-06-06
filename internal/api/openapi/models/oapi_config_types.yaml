@@ -1,0 +1,6 @@
+package: models
+output: stax-types.gen.go
+generate:
+  models: true
+output-options:
+  response-type-suffix: Resp
