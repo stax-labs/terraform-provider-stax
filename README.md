@@ -37,6 +37,22 @@ provider "stax" {
 }
 ```
 
+# Supported Resources
+
+| Type | Resource | Data Source | Integration Tests
+|---|---|---|---|
+| Account | ✅ | ✅ | ❌
+| AccountType | ✅ | ✅ | ❌
+| Permission Sets |
+| Policies |
+| APIToken | 
+| AccountType | 
+| User | 
+| Group |
+| Network* | 
+| Workload* |
+
+
 # Development
 
 To provide the required secrets during development and integration testing some environment variables are required to run examples. These can be configured using an `.envrc` file which is loaded by [direnv](https://direnv.net/).
@@ -51,6 +67,9 @@ export TF_LOG=INFO
 
 # used to test importing a stax account
 export IMPORT_STAX_ACCOUNT_ID=whatever_uuid
+
+# used to test importing a stax account type
+export IMPORT_STAX_ACCOUNT_TYPE_ID=whatever_uuid
 
 # used to test creating/updating a stax account
 export ACCOUNT_TYPE_ID=whatever_uuid

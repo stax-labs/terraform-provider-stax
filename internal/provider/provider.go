@@ -110,12 +110,14 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *StaxProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewAccountResource,
+		NewAccountTypeResource,
 	}
 }
 
 func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewAccountsDataSource,
+		NewAccountTypesDataSource,
 	}
 }
 
