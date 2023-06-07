@@ -287,8 +287,39 @@ func (cl *Client) AccountTypeRead(ctx context.Context, accountTypeIDs []string) 
 	return accountTypesResp, nil
 }
 
-func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error) {
+func (cl *Client) AccountTypeCreate(ctx context.Context, name string) (*client.AccountsCreateAccountTypeResp, error) {
+	accountTypeResp, err := cl.client.AccountsCreateAccountTypeWithResponse(ctx, models.AccountsCreateAccountType{
+		Name: name,
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
 
+	err = checkResponse(ctx, accountTypeResp, string(accountTypeResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return accountTypeResp, nil
+}
+
+func (cl *Client) AccountTypeUpdate(ctx context.Context, accountTypeID, name string) (*client.AccountsUpdateAccountTypeResp, error) {
+	accountTypeUpdateResp, err := cl.client.AccountsUpdateAccountTypeWithResponse(ctx, accountTypeID, models.AccountsUpdateAccountType{
+		Name: name,
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, accountTypeUpdateResp, string(accountTypeUpdateResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return accountTypeUpdateResp, nil
+}
+
+func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error) {
 	workloadDeleteResp, err := cl.client.WorkloadsDeleteWorkloadWithResponse(ctx, workloadID, cl.authRequestSigner)
 	if err != nil {
 		return nil, err
