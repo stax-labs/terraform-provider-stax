@@ -103,8 +103,21 @@ func WithInstallation(installation string) ClientOption {
 	}
 }
 
+func WithEndpointURL(endpointURL string) ClientOption {
+	return func(c *Client) {
+		c.endpointURL = endpointURL
+	}
+}
+
+func WithAuthRequestSigner(authRequestSigner client.RequestEditorFn) ClientOption {
+	return func(c *Client) {
+		c.authRequestSigner = authRequestSigner
+	}
+}
+
 type Client struct {
 	installation      string
+	endpointURL       string
 	httpClient        *http.Client
 	client            client.ClientWithResponsesInterface
 	apiToken          *auth.APIToken
@@ -134,7 +147,7 @@ func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 		return nil, ErrMissingAPIToken
 	}
 
-	url, err := getInstallationURL(c.installation)
+	url, err := getInstallationURL(c.installation, c.endpointURL)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +477,11 @@ func checkResponse(_ context.Context, res helpers.HTTPResponse, _ string) error 
 	return nil
 }
 
-func getInstallationURL(installation string) (string, error) {
+func getInstallationURL(installation, endpointURL string) (string, error) {
+	if endpointURL != "" {
+		return endpointURL, nil
+	}
+
 	switch installation {
 	case "dev":
 		return "https://api.core.dev.juma.cloud", nil

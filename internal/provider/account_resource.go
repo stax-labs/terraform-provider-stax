@@ -143,11 +143,23 @@ func (r *AccountResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	err = waitForTask(ctx, *created.JSON200.TaskId, r.client)
+	taskResp, err := waitForTask(ctx, *created.JSON200.TaskId, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to complete task, got error: %s", err))
 		return
 	}
+
+	accountsResp, err := r.client.AccountRead(ctx, *taskResp.Accounts, nil)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
+		return
+	}
+
+	tflog.Info(ctx, "reading accounts", map[string]interface{}{
+		"count": len(accountsResp.JSON200.Accounts),
+	})
+
+	data.ID = types.StringValue(toString(accountsResp.JSON200.Accounts[0].Id))
 
 	err = r.readAccount(ctx, data)
 	if err != nil {
@@ -210,7 +222,7 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 		"id": data.ID.ValueString(),
 	})
 
-	err = waitForTask(ctx, *accountResp.JSON200.TaskId, r.client)
+	_, err = waitForTask(ctx, *accountResp.JSON200.TaskId, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to complete task, got error: %s", err))
 		return
@@ -285,7 +297,9 @@ func (r *AccountResource) readAccount(ctx context.Context, data *AccountResource
 		}
 
 		tags := staxTagsToMapString(account.Tags)
-		data.Tags = types.MapValueMust(types.StringType, tags)
+		if len(tags) > 0 {
+			data.Tags = types.MapValueMust(types.StringType, tags)
+		}
 
 		if account.AccountType != nil {
 			if accountTypeID, ok := accountTypesMap[toString(account.AccountType)]; ok {
@@ -298,7 +312,7 @@ func (r *AccountResource) readAccount(ctx context.Context, data *AccountResource
 	return nil
 }
 
-func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientInterface) error {
+func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientInterface) (*models.TasksReadTask, error) {
 	tflog.Debug(ctx, "waiting for task", map[string]interface{}{
 		"taskID": len(taskID),
 	})
@@ -311,7 +325,7 @@ func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientIn
 		return true
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if finalTaskStatus.JSON200.Status != staxsdk.TaskSucceeded {
@@ -319,10 +333,10 @@ func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientIn
 			"task": finalTaskStatus.JSON200,
 		})
 
-		return fmt.Errorf("something went wrong with task, final status: %s", finalTaskStatus.JSON200.Status)
+		return nil, fmt.Errorf("something went wrong with task, final status: %s", finalTaskStatus.JSON200.Status)
 	}
 
-	return nil
+	return finalTaskStatus.JSON200, nil
 }
 
 func stringPtr(s string) *string {
