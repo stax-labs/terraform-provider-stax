@@ -49,9 +49,13 @@ provider "stax" {
 | AccountType | 
 | User | 
 | Group | ❌ | ✅
-| Network* | 
-| Workload* |
+| NetworkHub |
+| Workload |
+| Workload Manifest |
 
+# Limitations 
+
+1. The results of data sources is currently currently returning the first page from the Stax API, this is while we gauge impact and performance of the provider.
 
 # Development
 

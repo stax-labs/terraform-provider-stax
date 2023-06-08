@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -64,6 +65,21 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if testEndpointURL := os.Getenv("INTEGRATION_TEST_ENDPOINT_URL"); testEndpointURL != "" {
+		client, err := staxsdk.NewClient(&auth.APIToken{}, staxsdk.WithEndpointURL(testEndpointURL), staxsdk.WithAuthRequestSigner(func(ctx context.Context, req *http.Request) error {
+			return nil
+		}))
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create client, got error: %s", err))
+			return
+		}
+
+		resp.DataSourceData = client
+		resp.ResourceData = client
+
 		return
 	}
 
