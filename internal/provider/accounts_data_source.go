@@ -100,7 +100,6 @@ func (d *AccountsDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 						"aws_account_alias": schema.StringAttribute{
 							MarkdownDescription: "The aws account alias for the stax account",
 							Computed:            true,
-							Optional:            true,
 						},
 						"tags": schema.MapAttribute{
 							MarkdownDescription: "The tags associated with the Stax account",

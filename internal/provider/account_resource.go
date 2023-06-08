@@ -65,6 +65,9 @@ func (r *AccountResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"account_type_id": schema.StringAttribute{
 				MarkdownDescription: "The account type identifier for the account",
 				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"account_type": schema.StringAttribute{
 				MarkdownDescription: "The account type for the account",
@@ -189,6 +192,10 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 	staxTags := make(map[string]string)
 	resp.Diagnostics.Append(data.Tags.ElementsAs(ctx, &staxTags, false)...)
 
+	tflog.Info(ctx, "update account", map[string]interface{}{
+		"id": data.ID.ValueString(),
+	})
+
 	accountResp, err := r.client.AccountUpdate(ctx, data.ID.ValueString(), models.AccountsUpdateAccount{
 		Name:        stringPtr(data.Name.ValueString()),
 		AccountType: stringPtr(data.AccountTypeID.ValueString()),
@@ -199,11 +206,19 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	tflog.Info(ctx, "wait for account update", map[string]interface{}{
+		"id": data.ID.ValueString(),
+	})
+
 	err = waitForTask(ctx, *accountResp.JSON200.TaskId, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to complete task, got error: %s", err))
 		return
 	}
+
+	tflog.Info(ctx, "read updated account", map[string]interface{}{
+		"id": data.ID.ValueString(),
+	})
 
 	err = r.readAccount(ctx, data)
 	if err != nil {
@@ -225,7 +240,13 @@ func (r *AccountResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	// TODO: Need to figure out how to handle account deletion cleanly
+	resp.Diagnostics.AddWarning(
+		"Account Close Considerations",
+		"Applying this resource destruction will only remove the resource from the Terraform state "+
+			"and will not call the account close API due to AWS API limitations. Manually use the web "+
+			"interface to fully close this account.",
+	)
+
 }
 
 func (r *AccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

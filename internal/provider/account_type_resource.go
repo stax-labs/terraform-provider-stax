@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 
@@ -17,6 +18,7 @@ import (
 var _ resource.Resource = &AccountTypeResource{}
 var _ resource.ResourceWithConfigure = &AccountTypeResource{}
 var _ resource.ResourceWithImportState = &AccountTypeResource{}
+var _ resource.ResourceWithModifyPlan = &AccountTypeResource{}
 
 type AccountTypeResourceModel struct {
 	ID     types.String `tfsdk:"id"`
@@ -150,7 +152,7 @@ func (r *AccountTypeResource) Update(ctx context.Context, req resource.UpdateReq
 
 	accountResp, err := r.client.AccountTypeUpdate(ctx, data.ID.ValueString(), data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update account type, got error: %s", err))
 		return
 	}
 
@@ -180,9 +182,29 @@ func (r *AccountTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	// TODO: Need to figure out how to handle account type deletion cleanly
+	accountTypeDeleteResp, err := r.client.AccountTypeDelete(ctx, data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete account type, got error: %s", err))
+		return
+	}
+
+	tflog.Debug(ctx, "account type deleted", map[string]interface{}{
+		"id": toString(accountTypeDeleteResp.JSON200.AccountTypes.Id),
+	})
 }
 
 func (r *AccountTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *AccountTypeResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning(
+			"Resource Destruction Considerations",
+			"Applying this resource destruction will only remove the resource from the Terraform state "+
+				"and will not call the deletion API due to API limitations. Manually use the web "+
+				"interface to fully destroy this resource.",
+		)
+	}
 }

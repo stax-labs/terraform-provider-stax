@@ -319,6 +319,20 @@ func (cl *Client) AccountTypeUpdate(ctx context.Context, accountTypeID, name str
 	return accountTypeUpdateResp, nil
 }
 
+func (cl *Client) AccountTypeDelete(ctx context.Context, accountTypeID string) (*client.AccountsDeleteAccountTypeResp, error) {
+	accountTypeDeleteResp, err := cl.client.AccountsDeleteAccountTypeWithResponse(ctx, accountTypeID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, accountTypeDeleteResp, string(accountTypeDeleteResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return accountTypeDeleteResp, nil
+}
+
 func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error) {
 	workloadDeleteResp, err := cl.client.WorkloadsDeleteWorkloadWithResponse(ctx, workloadID, cl.authRequestSigner)
 	if err != nil {
