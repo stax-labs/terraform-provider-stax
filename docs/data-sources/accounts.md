@@ -13,7 +13,7 @@ Accounts datasource
 ## Example Usage
 
 ```terraform
-data "stax_accounts" "dedicated_dev" {
+data "stax_groups" "dedicated_dev" {
   filters = {
     names = ["presentation-dev"]
   }
@@ -62,5 +62,3 @@ Read-Only:
 - `admin` (String) URL for administrator access via IDAM
 - `developer` (String) URL for developer access via IDAM
 - `readonly` (String) URL for readonly access via IDAM
-
-

@@ -51,7 +51,7 @@ func (d *AccountTypesDataSource) Schema(ctx context.Context, req datasource.Sche
 			"filters": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.ListAttribute{
+					"ids": schema.ListAttribute{
 						Optional:    true,
 						ElementType: types.StringType,
 					},
@@ -109,12 +109,12 @@ func (d *AccountTypesDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	accountTypeIDs := []string{}
+	accountTypeIDs := new([]string)
 	if data.Filters != nil {
 		resp.Diagnostics.Append(data.Filters.IDs.ElementsAs(ctx, accountTypeIDs, false)...)
 	}
 
-	accountTypesResp, err := d.client.AccountTypeRead(ctx, accountTypeIDs)
+	accountTypesResp, err := d.client.AccountTypeRead(ctx, *accountTypeIDs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read accounts, got error: %s", err))
 		return

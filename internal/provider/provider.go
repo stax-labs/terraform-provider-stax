@@ -43,7 +43,7 @@ func (p *StaxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"installation": schema.StringAttribute{
-				MarkdownDescription: "Installation name",
+				MarkdownDescription: "Stax Installation Region",
 				Optional:            true,
 			},
 			"api_token_access_key": schema.StringAttribute{
@@ -118,6 +118,7 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		NewAccountsDataSource,
 		NewAccountTypesDataSource,
+		NewGroupsDataSource,
 	}
 }
 

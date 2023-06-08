@@ -10,14 +10,19 @@ testacc:
 	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
 
 # Run example stax_accounts datasource
-.PHONY: accounts-datasource-stax_accounts
-accounts-datasource-stax_accounts:
+.PHONY: datasource-stax_accounts
+datasource-stax_accounts:
 	terraform -chdir=examples/data-sources/stax_accounts plan -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)"
 
 # Run example stax_account_types datasource
-.PHONY: accounts-datasource-stax_account_types
-accounts-datasource-stax_account_types:
-	terraform -chdir=examples/data-sources/stax_account_types plan -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)"
+.PHONY: datasource-stax_account_types
+datasource-stax_account_types:
+	terraform -chdir=examples/data-sources/stax_account_types plan -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)" -var="account_type_id=$(ACCOUNT_TYPE_ID)"
+
+# Run example stax_account_types datasource
+.PHONY: datasource-stax_groups
+datasource-stax_groups:
+	terraform -chdir=examples/data-sources/stax_groups plan -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)" -var="group_id=$(GROUP_ID)"
 
 # Run example stax_account resource plan
 .PHONY: account-resource-plan

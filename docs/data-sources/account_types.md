@@ -13,7 +13,14 @@ Account Types datasource
 ## Example Usage
 
 ```terraform
+variable "account_type_id" {
+  description = "the account type identifier used for these accounts"
+}
+
 data "stax_account_types" "dedicated_dev" {
+  filters = {
+    ids = [var.account_type_id]
+  }
 }
 ```
 
@@ -33,7 +40,7 @@ data "stax_account_types" "dedicated_dev" {
 
 Optional:
 
-- `id` (List of String)
+- `ids` (List of String)
 
 
 <a id="nestedatt--account_types"></a>
@@ -44,5 +51,3 @@ Read-Only:
 - `id` (String) The identifier of the stax account type
 - `name` (String) The name of the stax account type
 - `status` (String) The status of the stax account type
-
-

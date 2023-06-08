@@ -50,4 +50,4 @@ provider "stax" {
 
 - `api_token_access_key` (String) API Token Access Key
 - `api_token_secret_key` (String) API Token Secret Key
-- `installation` (String) Installation name
+- `installation` (String) Stax Installation Region
