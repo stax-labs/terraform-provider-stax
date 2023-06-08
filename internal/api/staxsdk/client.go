@@ -206,6 +206,7 @@ func (cl *Client) AccountRead(ctx context.Context, accountIDs []string, accountN
 	idFilter := helpers.CommaDelimitedOptionalValue(accountIDs)
 	accountNamesFilter := helpers.CommaDelimitedOptionalValue(accountNames)
 
+	// TODO: implement paginated results
 	readAccountsRes, err := cl.client.AccountsReadAccountsWithResponse(ctx, &models.AccountsReadAccountsParams{
 		Filter:       aws.String(string(models.AccountStatusACTIVE)),
 		IncludeTags:  aws.Bool(true),
@@ -272,6 +273,7 @@ func (cl *Client) AccountTypeRead(ctx context.Context, accountTypeIDs []string) 
 
 	accountTypesFilter := helpers.CommaDelimitedOptionalValue(accountTypeIDs)
 
+	// TODO: implement paginated results
 	accountTypesResp, err := cl.client.AccountsReadAccountTypesWithResponse(ctx, &models.AccountsReadAccountTypesParams{
 		IdFilter: accountTypesFilter,
 	}, cl.authRequestSigner)
@@ -333,6 +335,34 @@ func (cl *Client) AccountTypeDelete(ctx context.Context, accountTypeID string) (
 	return accountTypeDeleteResp, nil
 }
 
+func (cl *Client) WorkloadCreate(ctx context.Context, createWorkload models.WorkloadsCreateWorkload) (*client.WorkloadsCreateWorkloadResp, error) {
+	workloadCreateResp, err := cl.client.WorkloadsCreateWorkloadWithResponse(ctx, createWorkload, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadCreateResp, string(workloadCreateResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadCreateResp, nil
+}
+
+func (cl *Client) WorkloadRead(ctx context.Context, params *models.WorkloadsReadWorkloadsParams) (*client.WorkloadsReadWorkloadsResp, error) {
+	workloadsReadResp, err := cl.client.WorkloadsReadWorkloadsWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsReadResp, string(workloadsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsReadResp, nil
+}
+
 func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error) {
 	workloadDeleteResp, err := cl.client.WorkloadsDeleteWorkloadWithResponse(ctx, workloadID, cl.authRequestSigner)
 	if err != nil {
@@ -345,6 +375,25 @@ func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*clien
 	}
 
 	return workloadDeleteResp, nil
+}
+
+func (cl *Client) GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error) {
+
+	groupsFilter := helpers.CommaDelimitedOptionalValue(groupIDs)
+
+	teamsReadResp, err := cl.client.TeamsReadGroupsWithResponse(ctx, &models.TeamsReadGroupsParams{
+		IdFilter: groupsFilter,
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, teamsReadResp, string(teamsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return teamsReadResp, nil
 }
 
 //	MonitorTask polls an asynchronous task and returns the final task response.

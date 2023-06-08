@@ -45,5 +45,3 @@ resource "stax_account" "presentation-dev" {
 - `aws_account_id` (String) The aws account identifier for the stax account
 - `id` (String) Account identifier
 - `status` (String) Account Status
-
-

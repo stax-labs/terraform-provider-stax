@@ -11,7 +11,7 @@ NOTE: This provider is built with the assumption that you are a Stax customer an
 
 ```terraform
 variable "installation" {
-  description = "installation name"
+  description = "installation region name"
 }
 
 variable "api_token_access_key" {
@@ -39,16 +39,16 @@ provider "stax" {
 
 # Supported Resources
 
-| Type | Resource | Data Source | Integration Tests
-|---|---|---|---|
-| Account | ✅ | ✅ | ❌
-| AccountType | ✅ | ✅ | ❌
+| Type | Resource | Data Source
+|---|---|---|
+| Account | ✅ | ✅ 
+| AccountType | ✅ | ✅
 | Permission Sets |
 | Policies |
 | APIToken | 
 | AccountType | 
 | User | 
-| Group |
+| Group | ❌ | ✅
 | Network* | 
 | Workload* |
 

@@ -34,5 +34,3 @@ resource "stax_account_type" "production" {
 
 - `id` (String) Account type identifier
 - `status` (String) The status of the stax account type
-
-
