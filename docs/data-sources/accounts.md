@@ -42,14 +42,11 @@ Optional:
 <a id="nestedatt--accounts"></a>
 ### Nested Schema for `accounts`
 
-Optional:
-
-- `aws_account_alias` (String) The aws account alias for the stax account
-
 Read-Only:
 
 - `account_type` (String) The account type for this stax account
 - `account_type_id` (String) The account type identifier for this stax account
+- `aws_account_alias` (String) The aws account alias for the stax account
 - `aws_account_id` (String) The aws account identifier for the stax account
 - `aws_login_urls` (Attributes) (see [below for nested schema](#nestedatt--accounts--aws_login_urls))
 - `id` (String) The identifier of the stax account
