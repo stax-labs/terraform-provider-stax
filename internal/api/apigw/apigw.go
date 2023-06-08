@@ -22,9 +22,9 @@ func RequestSigner(region string, credsRetriever auth.CredentialsRetrieverFn) cl
 	}
 }
 
-func signRequest(region string, ctx context.Context, req *http.Request, credsReRetriever auth.CredentialsRetrieverFn) error {
+func signRequest(region string, ctx context.Context, req *http.Request, credsRetriever auth.CredentialsRetrieverFn) error {
 	signer := v4.NewSigner()
-	credentials, err := credsReRetriever(ctx)
+	credentials, err := credsRetriever(ctx)
 	if err != nil {
 		return err
 	}

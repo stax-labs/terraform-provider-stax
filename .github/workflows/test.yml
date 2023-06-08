@@ -71,7 +71,10 @@ jobs:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
       - run: go mod download
+      - run: go install github.com/mfridman/tparse@latest
       - env:
+          COVER_OPTS: "-coverprofile=coverage.txt -covermode=atomic"
+          GOFLAGS:  "-v -count=1 -json"
           TF_ACC: "1"
-        run: go test -v -cover ./internal/provider/
+        run: go test $COVER_OPTS ./... | tparse -all -notests -format markdown >> $GITHUB_STEP_SUMMARY
         timeout-minutes: 10
