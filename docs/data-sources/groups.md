@@ -40,7 +40,7 @@ data "stax_groups" "dedicated_dev" {
 
 Optional:
 
-- `ids` (List of String)
+- `ids` (List of String) A list of identifiers used to filter stax groups
 
 
 <a id="nestedatt--groups"></a>

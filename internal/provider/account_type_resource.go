@@ -31,7 +31,7 @@ func NewAccountTypeResource() resource.Resource {
 
 // AccountResource defines the resource implementation.
 type AccountTypeResource struct {
-	client *staxsdk.Client
+	client staxsdk.ClientInterface
 }
 
 func (r *AccountTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

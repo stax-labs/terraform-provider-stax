@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
@@ -83,25 +82,11 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	if data.Installation.IsNull() {
-		data.Installation = basetypes.NewStringValue(os.Getenv("STAX_INSTALLATION"))
-	}
-
-	if data.APITokenAccessKey.IsNull() {
-		data.APITokenAccessKey = basetypes.NewStringValue(os.Getenv("STAX_ACCESS_KEY"))
-	}
-
-	if data.APITokenSecretKey.IsNull() {
-		data.APITokenSecretKey = basetypes.NewStringValue(os.Getenv("STAX_ACCESS_SECRET"))
-	}
-
 	tflog.Trace(ctx, "connecting to stax API", map[string]interface{}{
 		"installation": data.Installation.String(),
 		"access_key":   data.APITokenAccessKey.String(),
 	})
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
 	apiToken := &auth.APIToken{
 		AccessKey: data.APITokenAccessKey.ValueString(),
 		SecretKey: data.APITokenSecretKey.ValueString(),

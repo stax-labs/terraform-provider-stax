@@ -40,7 +40,7 @@ data "stax_account_types" "dedicated_dev" {
 
 Optional:
 
-- `ids` (List of String)
+- `ids` (List of String) A list of identifiers used to filter account types
 
 
 <a id="nestedatt--account_types"></a>

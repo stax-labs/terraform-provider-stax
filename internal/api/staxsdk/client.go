@@ -58,10 +58,18 @@ type ClientInterface interface {
 	AccountUpdate(ctx context.Context, accountID string, updateAccount models.AccountsUpdateAccount) (*client.AccountsUpdateAccountResp, error)
 	// AccountClose closes an account and returns a SyncResult containing the response and final task status.
 	AccountClose(ctx context.Context, accountID string) (*client.AccountsCloseAccountResp, error)
+	// AccountTypeCreate creates an account type and returns a client.AccountsCreateAccountTypeResp.
+	AccountTypeCreate(ctx context.Context, name string) (*client.AccountsCreateAccountTypeResp, error)
+	// AccountTypeUpdate updates an account type and returns a client.AccountsUpdateAccountTypeResp.
+	AccountTypeUpdate(ctx context.Context, accountTypeID, name string) (*client.AccountsUpdateAccountTypeResp, error)
+	//  AccountTypeDelete deletes an account type and returns a client.AccountsDeleteAccountTypeResp.
+	AccountTypeDelete(ctx context.Context, accountTypeID string) (*client.AccountsDeleteAccountTypeResp, error)
 	// AccountTypeRead reads account types and returns a client.AccountsReadAccountTypesResp.
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
 	// WorkloadDelete deletes a workload and returns a client.WorkloadsDeleteWorkloadResp.
 	WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error)
+	//  GroupRead reads groups and returns a client.TeamsReadGroupsResp.
+	GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error)
 	//	MonitorTask polls an asynchronous task and returns the final task response.
 	MonitorTask(ctx context.Context, taskID string, callbackFunc func(context.Context, *client.TasksReadTaskResp) bool) (*client.TasksReadTaskResp, error)
 }
@@ -114,6 +122,8 @@ func WithAuthRequestSigner(authRequestSigner client.RequestEditorFn) ClientOptio
 		c.authRequestSigner = authRequestSigner
 	}
 }
+
+var _ ClientInterface = &Client{}
 
 type Client struct {
 	installation      string
@@ -177,6 +187,13 @@ func (cl *Client) Authenticate(ctx context.Context) error {
 	return nil
 }
 
+//	PublicReadConfig reads the public configuration from the STAX API.
+//
+// ctx: The context to use for this request.
+//
+// Returns:
+// - publicConfigResp: The response from the PublicReadConfig API call.
+// - err: Any error that occurred.
 func (cl *Client) PublicReadConfig(ctx context.Context) (*client.PublicReadConfigResp, error) {
 	publicConfigResp, err := cl.client.PublicReadConfigWithResponse(ctx)
 	if err != nil {
@@ -191,6 +208,14 @@ func (cl *Client) PublicReadConfig(ctx context.Context) (*client.PublicReadConfi
 	return publicConfigResp, nil
 }
 
+//	AccountCreate creates an account in STAX.
+//
+// ctx: The context to use for this request.
+// createAccount: The account details to create.
+//
+// Returns:
+// - createResp: The response from the AccountsCreateAccount API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountCreate(ctx context.Context, createAccount models.AccountsCreateAccount) (*client.AccountsCreateAccountResp, error) {
 	err := cl.checkSession(ctx)
 	if err != nil {
@@ -210,6 +235,15 @@ func (cl *Client) AccountCreate(ctx context.Context, createAccount models.Accoun
 	return createResp, nil
 }
 
+//	AccountRead reads accounts from STAX.
+//
+// ctx: The context to use for this request.
+// accountIDs: Optional list of account IDs to filter by.
+// accountNames: Optional list of account names to filter by.
+//
+// Returns:
+// - readAccountsRes: The response from the AccountsReadAccounts API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountRead(ctx context.Context, accountIDs []string, accountNames []string) (*client.AccountsReadAccountsResp, error) {
 	err := cl.checkSession(ctx)
 	if err != nil {
@@ -238,6 +272,15 @@ func (cl *Client) AccountRead(ctx context.Context, accountIDs []string, accountN
 	return readAccountsRes, nil
 }
 
+//	AccountUpdate updates an account in STAX.
+//
+// ctx: The context to use for this request.
+// accountID: The ID of the account to update.
+// updateAccount: The account update parameters.
+//
+// Returns:
+// - accountUpdateRes: The response from the AccountsUpdateAccount API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountUpdate(ctx context.Context, accountID string, updateAccount models.AccountsUpdateAccount) (*client.AccountsUpdateAccountResp, error) {
 	err := cl.checkSession(ctx)
 	if err != nil {
@@ -257,6 +300,14 @@ func (cl *Client) AccountUpdate(ctx context.Context, accountID string, updateAcc
 	return accountUpdateRes, nil
 }
 
+//	AccountClose closes an account in STAX.
+//
+// ctx: The context to use for this request.
+// accountID: The ID of the account to close.
+//
+// Returns:
+// - accountCloseResp: The response from the AccountsCloseAccount API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountClose(ctx context.Context, accountID string) (*client.AccountsCloseAccountResp, error) {
 	err := cl.checkSession(ctx)
 	if err != nil {
@@ -278,6 +329,14 @@ func (cl *Client) AccountClose(ctx context.Context, accountID string) (*client.A
 	return accountCloseResp, nil
 }
 
+//	AccountTypeRead reads account types from STAX.
+//
+// ctx: The context to use for this request.
+// accountTypeIDs: A list of account type IDs to filter the results. If empty, all account types will be returned.
+//
+// Returns:
+// - accountTypesResp: The response from the AccountsReadAccountTypes API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error) {
 	err := cl.checkSession(ctx)
 	if err != nil {
@@ -302,6 +361,14 @@ func (cl *Client) AccountTypeRead(ctx context.Context, accountTypeIDs []string) 
 	return accountTypesResp, nil
 }
 
+//	AccountTypeCreate creates an account type in STAX.
+//
+// ctx: The context to use for this request.
+// name: The name of the account type to create.
+//
+// Returns:
+// - accountTypeResp: The response from the AccountsCreateAccountType API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountTypeCreate(ctx context.Context, name string) (*client.AccountsCreateAccountTypeResp, error) {
 	accountTypeResp, err := cl.client.AccountsCreateAccountTypeWithResponse(ctx, models.AccountsCreateAccountType{
 		Name: name,
@@ -318,6 +385,15 @@ func (cl *Client) AccountTypeCreate(ctx context.Context, name string) (*client.A
 	return accountTypeResp, nil
 }
 
+//	AccountTypeUpdate updates an account type in STAX.
+//
+// ctx: The context to use for this request.
+// accountTypeID: The ID of the account type to update.
+// name: The new name of the account type.
+//
+// Returns:
+// - accountTypeUpdateResp: The response from the AccountsUpdateAccountType API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountTypeUpdate(ctx context.Context, accountTypeID, name string) (*client.AccountsUpdateAccountTypeResp, error) {
 	accountTypeUpdateResp, err := cl.client.AccountsUpdateAccountTypeWithResponse(ctx, accountTypeID, models.AccountsUpdateAccountType{
 		Name: name,
@@ -334,6 +410,14 @@ func (cl *Client) AccountTypeUpdate(ctx context.Context, accountTypeID, name str
 	return accountTypeUpdateResp, nil
 }
 
+//	AccountTypeDelete deletes an account type in STAX.
+//
+// ctx: The context to use for this request.
+// accountTypeID: The ID of the account type to delete.
+//
+// Returns:
+// - accountTypeDeleteResp: The response from the AccountsDeleteAccountType API call.
+// - err: Any error that occurred.
 func (cl *Client) AccountTypeDelete(ctx context.Context, accountTypeID string) (*client.AccountsDeleteAccountTypeResp, error) {
 	accountTypeDeleteResp, err := cl.client.AccountsDeleteAccountTypeWithResponse(ctx, accountTypeID, cl.authRequestSigner)
 	if err != nil {
@@ -348,6 +432,14 @@ func (cl *Client) AccountTypeDelete(ctx context.Context, accountTypeID string) (
 	return accountTypeDeleteResp, nil
 }
 
+//	WorkloadCreate creates a new workload in STAX.
+//
+// ctx: The context to use for this request.
+// createWorkload: The details of the workload to create.
+//
+// Returns:
+// - workloadCreateResp: The response from the WorkloadsCreateWorkload API call.
+// - err: Any error that occurred.
 func (cl *Client) WorkloadCreate(ctx context.Context, createWorkload models.WorkloadsCreateWorkload) (*client.WorkloadsCreateWorkloadResp, error) {
 	workloadCreateResp, err := cl.client.WorkloadsCreateWorkloadWithResponse(ctx, createWorkload, cl.authRequestSigner)
 	if err != nil {
@@ -362,6 +454,14 @@ func (cl *Client) WorkloadCreate(ctx context.Context, createWorkload models.Work
 	return workloadCreateResp, nil
 }
 
+//	WorkloadRead reads workloads from STAX.
+//
+// ctx: The context to use for this request.
+// params: The parameters for filtering which workloads to read.
+//
+// Returns:
+// - workloadsReadResp: The response from the WorkloadsReadWorkloads API call.
+// - err: Any error that occurred.
 func (cl *Client) WorkloadRead(ctx context.Context, params *models.WorkloadsReadWorkloadsParams) (*client.WorkloadsReadWorkloadsResp, error) {
 	workloadsReadResp, err := cl.client.WorkloadsReadWorkloadsWithResponse(ctx, params, cl.authRequestSigner)
 	if err != nil {
@@ -376,6 +476,14 @@ func (cl *Client) WorkloadRead(ctx context.Context, params *models.WorkloadsRead
 	return workloadsReadResp, nil
 }
 
+//	WorkloadDelete deletes a workload in STAX.
+//
+// ctx: The context to use for this request.
+// workloadID: The ID of the workload to delete.
+//
+// Returns:
+// - workloadDeleteResp: The response from the WorkloadsDeleteWorkload API call.
+// - err: Any error that occurred.
 func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error) {
 	workloadDeleteResp, err := cl.client.WorkloadsDeleteWorkloadWithResponse(ctx, workloadID, cl.authRequestSigner)
 	if err != nil {
@@ -390,6 +498,14 @@ func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*clien
 	return workloadDeleteResp, nil
 }
 
+//	GroupRead reads groups from STAX.
+//
+// ctx: The context to use for this request.
+// groupIDs: A list of group IDs to filter the response by. Optional.
+//
+// Returns:
+// - teamsReadResp: The response from the TeamsReadGroups API call.
+// - err: Any error that occurred.
 func (cl *Client) GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error) {
 
 	groupsFilter := helpers.CommaDelimitedOptionalValue(groupIDs)
