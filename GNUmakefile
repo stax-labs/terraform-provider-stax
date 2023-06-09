@@ -48,7 +48,7 @@ account-type-resource-apply:
 .PHONY: account-resource-import
 account-resource-import:
 	rm -rf examples/resources/stax_account/*.tfstate
-	cd examples/resources/stax_account && terraform import -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)" stax_account.presentation-dev $(IMPORT_STAX_ACCOUNT_ID)
+	cd examples/resources/stax_account && terraform import -var="installation=$(STAX_INSTALLATION)" -var="api_token_access_key=$(STAX_ACCESS_KEY)" -var="api_token_secret_key=$(STAX_SECRET_KEY)" -var="account_type_id=$(ACCOUNT_TYPE_ID)" stax_account.presentation-dev $(IMPORT_STAX_ACCOUNT_ID)
 
 # Run example stax_account import
 .PHONY: account-type-resource-import

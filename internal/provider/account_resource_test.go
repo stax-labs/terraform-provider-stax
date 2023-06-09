@@ -13,14 +13,18 @@ import (
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/server"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 	"github.com/stretchr/testify/mock"
+	"github.com/valyala/fasttemplate"
 )
 
-const resourceConfigTF = `
-resource "stax_account" "presentation-dev" {
-	name            = "presentation-dev"
-	account_type_id = "87c570e2-c795-44b0-aefa-ebdcffd4d048"
-}
-`
+const (
+	accountTypeIDProduction = "87c570e2-c795-44b0-aefa-ebdcffd4d048"
+
+	staxAccountResourceTemplate = `
+resource "stax_account" "${accountLabel}" {
+	name            = "${accountName}"
+	account_type_id = "${accountTypeID}"
+}`
+)
 
 func TestAccountResource(t *testing.T) {
 
@@ -38,7 +42,7 @@ func TestAccountResource(t *testing.T) {
 		return c.JSON(200, &models.AccountsReadAccountTypes{
 			AccountTypes: []models.AccountType{
 				{
-					Id:   stringPtr("87c570e2-c795-44b0-aefa-ebdcffd4d048"),
+					Id:   stringPtr(accountTypeIDProduction),
 					Name: "production",
 				},
 			},
@@ -76,14 +80,23 @@ func TestAccountResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Read testing
 			{
-				// Config: testAccGroupsDataSourceConfig("test", "f646e0cf-840c-401a-933c-1ef3432b5a37"),
-				Config: resourceConfigTF,
+				Config: testAccCheckStaxAccountConfig("presentation-dev", "presentation-dev", accountTypeIDProduction),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckStaxAccountExists("stax_account.presentation-dev"),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckStaxAccountConfig(accountLabel, accountName, accountTypeID string) string {
+	return fasttemplate.ExecuteString(staxAccountResourceTemplate, "${", "}",
+		map[string]any{
+			"accountLabel":  accountLabel,
+			"accountName":   accountName,
+			"accountTypeID": accountTypeID,
+		},
+	)
 }
 
 func testAccCheckStaxAccountExists(n string) resource.TestCheckFunc {

@@ -18,7 +18,6 @@ import (
 var _ resource.Resource = &AccountTypeResource{}
 var _ resource.ResourceWithConfigure = &AccountTypeResource{}
 var _ resource.ResourceWithImportState = &AccountTypeResource{}
-var _ resource.ResourceWithModifyPlan = &AccountTypeResource{}
 
 type AccountTypeResourceModel struct {
 	ID     types.String `tfsdk:"id"`
@@ -195,16 +194,4 @@ func (r *AccountTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 
 func (r *AccountTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r *AccountTypeResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-
-	if req.Plan.Raw.IsNull() {
-		resp.Diagnostics.AddWarning(
-			"Resource Destruction Considerations",
-			"Applying this resource destruction will only remove the resource from the Terraform state "+
-				"and will not call the deletion API due to API limitations. Manually use the web "+
-				"interface to fully destroy this resource.",
-		)
-	}
 }
