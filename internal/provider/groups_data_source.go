@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -30,6 +31,7 @@ type GroupDataSourceModel struct {
 
 // GroupsDataSourceModel describes the data source data model.
 type GroupsDataSourceModel struct {
+	ID      types.String           `tfsdk:"id"`
 	Filters *GroupsFiltersModel    `tfsdk:"filters"`
 	Groups  []GroupDataSourceModel `tfsdk:"groups"`
 }
@@ -47,6 +49,10 @@ func (d *GroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 		MarkdownDescription: "Accounts datasource",
 
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Account identifier used to select an account, this takes precedence over filters",
+			},
 			"filters": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
@@ -106,12 +112,18 @@ func (d *GroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-	groupIDs := new([]string)
-	if data.Filters != nil {
-		resp.Diagnostics.Append(data.Filters.IDs.ElementsAs(ctx, groupIDs, false)...)
+	groupIDs := make([]string, 0)
+
+	// given that the id takes precedence over filters, if it is set ignore filters.
+	if !data.ID.IsNull() {
+		groupIDs = []string{data.ID.ValueString()}
+	} else {
+		if data.Filters != nil {
+			resp.Diagnostics.Append(data.Filters.IDs.ElementsAs(ctx, &groupIDs, false)...)
+		}
 	}
 
-	groupsResp, err := d.client.GroupRead(ctx, *groupIDs)
+	groupsResp, err := d.client.GroupRead(ctx, groupIDs)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read groups, got error: %s", err))
 		return
@@ -123,7 +135,7 @@ func (d *GroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	for _, group := range groupsResp.JSON200.Groups {
 		data.Groups = append(data.Groups, GroupDataSourceModel{
-			ID:     types.StringValue(toString(group.Id)),
+			ID:     types.StringValue(aws.ToString(group.Id)),
 			Name:   types.StringValue(group.Name),
 			Status: types.StringValue(string(group.Status)),
 		})

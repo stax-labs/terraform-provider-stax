@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -127,7 +128,7 @@ func (d *AccountTypesDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	for _, accountType := range accountTypesResp.JSON200.AccountTypes {
 		accountTypeModel := AccountTypeDataSourceModel{
-			ID:     types.StringValue(toString(accountType.Id)),
+			ID:     types.StringValue(aws.ToString(accountType.Id)),
 			Name:   types.StringValue(accountType.Name),
 			Status: types.StringValue(fmt.Sprintf("%s", accountType.Status)),
 		}

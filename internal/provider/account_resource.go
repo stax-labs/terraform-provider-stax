@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -159,7 +160,7 @@ func (r *AccountResource) Create(ctx context.Context, req resource.CreateRequest
 		"count": len(accountsResp.JSON200.Accounts),
 	})
 
-	data.ID = types.StringValue(toString(accountsResp.JSON200.Accounts[0].Id))
+	data.ID = types.StringValue(aws.ToString(accountsResp.JSON200.Accounts[0].Id))
 
 	err = r.readAccount(ctx, data)
 	if err != nil {
@@ -209,8 +210,8 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 	})
 
 	accountResp, err := r.client.AccountUpdate(ctx, data.ID.ValueString(), models.AccountsUpdateAccount{
-		Name:        stringPtr(data.Name.ValueString()),
-		AccountType: stringPtr(data.AccountTypeID.ValueString()),
+		Name:        aws.String(data.Name.ValueString()),
+		AccountType: aws.String(data.AccountTypeID.ValueString()),
 		Tags:        (*models.StaxTags)(&staxTags),
 	})
 	if err != nil {
@@ -283,17 +284,17 @@ func (r *AccountResource) readAccount(ctx context.Context, data *AccountResource
 	accountTypesMap := make(map[string]string)
 
 	for _, accountType := range accountTypesResp.JSON200.AccountTypes {
-		accountTypesMap[accountType.Name] = toString(accountType.Id)
+		accountTypesMap[accountType.Name] = aws.ToString(accountType.Id)
 	}
 
 	for _, account := range accountsResp.JSON200.Accounts {
 		data.ID = types.StringValue(*account.Id)
 		data.Name = types.StringValue(account.Name)
 		data.Status = types.StringValue(string(*account.Status))
-		data.AWsAccountID = types.StringValue(toString(account.AwsAccountId))
+		data.AWsAccountID = types.StringValue(aws.ToString(account.AwsAccountId))
 
 		if account.AwsAccountAlias != nil {
-			data.AwsAccountAlias = types.StringValue(toString(account.AwsAccountAlias))
+			data.AwsAccountAlias = types.StringValue(aws.ToString(account.AwsAccountAlias))
 		}
 
 		tags := staxTagsToMapString(account.Tags)
@@ -302,9 +303,9 @@ func (r *AccountResource) readAccount(ctx context.Context, data *AccountResource
 		}
 
 		if account.AccountType != nil {
-			if accountTypeID, ok := accountTypesMap[toString(account.AccountType)]; ok {
+			if accountTypeID, ok := accountTypesMap[aws.ToString(account.AccountType)]; ok {
 				data.AccountTypeID = types.StringValue(accountTypeID)
-				data.AccountType = types.StringValue(toString(account.AccountType))
+				data.AccountType = types.StringValue(aws.ToString(account.AccountType))
 			}
 		}
 	}
@@ -337,17 +338,6 @@ func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientIn
 	}
 
 	return finalTaskStatus.JSON200, nil
-}
-
-func stringPtr(s string) *string {
-	return &s
-}
-
-func toString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
 }
 
 func staxTagsToMap(tags *models.StaxTags) map[string]string {

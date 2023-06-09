@@ -1,3 +1,4 @@
+// This package signs requests to API Gateway.
 package apigw
 
 import (

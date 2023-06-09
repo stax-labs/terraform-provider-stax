@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/labstack/echo/v4"
@@ -31,7 +32,7 @@ func TestAccountResource(t *testing.T) {
 	si := mocks.NewServerInterface(t)
 
 	si.On("AccountsCreateAccount", mock.AnythingOfType("*echo.context")).Return(func(c echo.Context) error {
-		return c.JSON(200, &models.AccountsCreateAccountResponse{TaskId: stringPtr("4f2e7318-1e25-4b62-84b5-1cd701042760")})
+		return c.JSON(200, &models.AccountsCreateAccountResponse{TaskId: aws.String("4f2e7318-1e25-4b62-84b5-1cd701042760")})
 	})
 
 	si.On("TasksReadTask", mock.AnythingOfType("*echo.context"), mock.AnythingOfType("string")).Return(func(c echo.Context, taskId string) error {
@@ -42,7 +43,7 @@ func TestAccountResource(t *testing.T) {
 		return c.JSON(200, &models.AccountsReadAccountTypes{
 			AccountTypes: []models.AccountType{
 				{
-					Id:   stringPtr(accountTypeIDProduction),
+					Id:   aws.String(accountTypeIDProduction),
 					Name: "production",
 				},
 			},
@@ -53,10 +54,10 @@ func TestAccountResource(t *testing.T) {
 		return c.JSON(200, &models.AccountsReadAccounts{
 			Accounts: []models.Account{
 				{
-					Id:          stringPtr("f646e0cf-840c-401a-933c-1ef3432b5a37"),
+					Id:          aws.String("f646e0cf-840c-401a-933c-1ef3432b5a37"),
 					Name:        "presentation-dev",
-					Status:      (*models.AccountStatus)(stringPtr("ACTIVE")),
-					AccountType: stringPtr("production"),
+					Status:      (*models.AccountStatus)(aws.String("ACTIVE")),
+					AccountType: aws.String("production"),
 					Tags:        &models.StaxTags{},
 				},
 			},
