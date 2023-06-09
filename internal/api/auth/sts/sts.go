@@ -1,3 +1,4 @@
+// This package provides a function which gets AWS credentials from Cognito Identity using the provided ID token
 package sts
 
 import (
@@ -58,6 +59,23 @@ func WithLogger(logger logging.Logger) CredsOption {
 	}
 }
 
+//	GetCredentials gets AWS credentials from Cognito Identity using the provided ID token.
+//
+// opts are the configuration options for getting the credentials.
+//
+// cfg is the CredsConfig which is populated from the opts.
+//
+// awscfg is the default AWS config loaded with anonymous credentials. It is used to construct clients if not provided in opts.
+//
+// cisvc is the CognitoIdentity client. If not provided in opts, it is constructed from the awscfg.
+//
+// logins is the map of logins (cognito idp domain and user pool id) to the ID token.
+//
+// getIdRes is the response from calling GetId to get the identity ID.
+//
+// credsRes is the response from calling GetCredentialsForIdentity to get the temporary AWS credentials.
+//
+// The function returns the AWS config loaded with the temporary credentials.
 func GetCredentials(ctx context.Context, opts ...CredsOption) (aws.Config, error) {
 
 	cfg := CredsConfig{}

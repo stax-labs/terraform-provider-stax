@@ -30,6 +30,7 @@ data "stax_groups" "dedicated_dev" {
 ### Optional
 
 - `filters` (Attributes) (see [below for nested schema](#nestedatt--filters))
+- `id` (String) Account identifier used to select an account, this takes precedence over filters
 
 ### Read-Only
 

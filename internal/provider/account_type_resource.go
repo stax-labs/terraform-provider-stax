@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -97,14 +98,14 @@ func (r *AccountTypeResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{toString(accountTypeCreate.JSON200.Detail.AccountType.Id)})
+	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{aws.ToString(accountTypeCreate.JSON200.Detail.AccountType.Id)})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account type, got error: %s", err))
 		return
 	}
 
 	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(toString(accountType.Id))
+		data.ID = types.StringValue(aws.ToString(accountType.Id))
 		data.Name = types.StringValue(accountType.Name)
 		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
@@ -130,7 +131,7 @@ func (r *AccountTypeResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(toString(accountType.Id))
+		data.ID = types.StringValue(aws.ToString(accountType.Id))
 		data.Name = types.StringValue(accountType.Name)
 		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
@@ -155,14 +156,14 @@ func (r *AccountTypeResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{toString(accountResp.JSON200.AccountTypes.Id)})
+	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{aws.ToString(accountResp.JSON200.AccountTypes.Id)})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account type, got error: %s", err))
 		return
 	}
 
 	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(toString(accountType.Id))
+		data.ID = types.StringValue(aws.ToString(accountType.Id))
 		data.Name = types.StringValue(accountType.Name)
 		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
@@ -188,7 +189,7 @@ func (r *AccountTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	tflog.Debug(ctx, "account type deleted", map[string]interface{}{
-		"id": toString(accountTypeDeleteResp.JSON200.AccountTypes.Id),
+		"id": aws.ToString(accountTypeDeleteResp.JSON200.AccountTypes.Id),
 	})
 }
 

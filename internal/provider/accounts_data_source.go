@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -181,33 +182,33 @@ func (d *AccountsDataSource) Read(ctx context.Context, req datasource.ReadReques
 	accountTypesMap := make(map[string]string)
 
 	for _, accountType := range accountTypesResp.JSON200.AccountTypes {
-		accountTypesMap[accountType.Name] = toString(accountType.Id)
+		accountTypesMap[accountType.Name] = aws.ToString(accountType.Id)
 	}
 
 	for _, account := range accountsResp.JSON200.Accounts {
 		accountModel := AccountDataSourceModel{
-			ID:           types.StringValue(toString(account.Id)),
+			ID:           types.StringValue(aws.ToString(account.Id)),
 			Name:         types.StringValue(account.Name),
 			Status:       types.StringValue(string(*account.Status)),
-			AWsAccountID: types.StringValue(toString(account.AwsAccountId)),
+			AWsAccountID: types.StringValue(aws.ToString(account.AwsAccountId)),
 		}
 
 		if account.AwsAccountAlias != nil {
-			accountModel.AwsAccountAlias = types.StringValue(toString(account.AwsAccountAlias))
+			accountModel.AwsAccountAlias = types.StringValue(aws.ToString(account.AwsAccountAlias))
 		}
 
 		if account.AWSLoginURLs != nil {
 			accountModel.AWSLoginUrls = types.ObjectValueMust(awsLoginsAttrTypes, map[string]attr.Value{
-				"admin":     types.StringValue(toString(account.AWSLoginURLs.Admin)),
-				"developer": types.StringValue(toString(account.AWSLoginURLs.Developer)),
-				"readonly":  types.StringValue(toString(account.AWSLoginURLs.Readonly)),
+				"admin":     types.StringValue(aws.ToString(account.AWSLoginURLs.Admin)),
+				"developer": types.StringValue(aws.ToString(account.AWSLoginURLs.Developer)),
+				"readonly":  types.StringValue(aws.ToString(account.AWSLoginURLs.Readonly)),
 			})
 		}
 
 		if account.AccountType != nil {
-			if accountTypeID, ok := accountTypesMap[toString(account.AccountType)]; ok {
+			if accountTypeID, ok := accountTypesMap[aws.ToString(account.AccountType)]; ok {
 				accountModel.AccountTypeID = types.StringValue(accountTypeID)
-				accountModel.AccountType = types.StringValue(toString(account.AccountType))
+				accountModel.AccountType = types.StringValue(aws.ToString(account.AccountType))
 			}
 		}
 
