@@ -36,7 +36,7 @@ data "stax_groups" "dedicated_dev" {
 
 Optional:
 
-- `names` (List of String)
+- `names` (List of String) A list of names used to filter accounts
 
 
 <a id="nestedatt--accounts"></a>

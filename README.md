@@ -45,8 +45,7 @@ provider "stax" {
 | AccountType | ✅ | ✅
 | Permission Sets |
 | Policies |
-| APIToken | 
-| AccountType | 
+| APIToken |
 | User | 
 | Group | ❌ | ✅
 | NetworkHub |

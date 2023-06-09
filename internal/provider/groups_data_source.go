@@ -19,7 +19,7 @@ func NewGroupsDataSource() datasource.DataSource {
 
 // GroupsDataSource defines the data source implementation.
 type GroupsDataSource struct {
-	client *staxsdk.Client
+	client staxsdk.ClientInterface
 }
 
 type GroupDataSourceModel struct {
@@ -51,8 +51,9 @@ func (d *GroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"ids": schema.ListAttribute{
-						Optional:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: "A list of identifiers used to filter stax groups",
+						Optional:            true,
+						ElementType:         types.StringType,
 					},
 				},
 			},

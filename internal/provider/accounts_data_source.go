@@ -20,7 +20,7 @@ func NewAccountsDataSource() datasource.DataSource {
 
 // AccountDataSource defines the data source implementation.
 type AccountsDataSource struct {
-	client *staxsdk.Client
+	client staxsdk.ClientInterface
 }
 
 type AccountDataSourceModel struct {
@@ -64,8 +64,9 @@ func (d *AccountsDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"names": schema.ListAttribute{
-						Optional:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: "A list of names used to filter accounts",
+						Optional:            true,
+						ElementType:         types.StringType,
 					},
 				},
 			},

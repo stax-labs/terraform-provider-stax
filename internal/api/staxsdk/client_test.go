@@ -57,9 +57,7 @@ func TestClient_PublicReadConfig(t *testing.T) {
 		}, nil)
 
 	publicConfigResp, err := testClient.PublicReadConfig(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(err)
 
 	assert.Equal(&models.PublicReadConfig{}, publicConfigResp.JSON200)
 }
@@ -91,11 +89,35 @@ func TestClient_AccountCreate(t *testing.T) {
 	}, nil)
 
 	createResp, err := testClient.AccountCreate(ctx, createAccount)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(err)
 
 	assert.Equal("test", *createResp.JSON200.TaskId)
+}
+
+func TestClient_GroupRead(t *testing.T) {
+	assert := require.New(t)
+
+	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	ctx := context.Background()
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	params := &models.TeamsReadGroupsParams{
+		IdFilter: aws.String(groupId),
+	}
+
+	clientWithResponsesMock.On("TeamsReadGroupsWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		params,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsReadGroupsResp{
+		JSON200:      &models.TeamsReadGroupsResponse{},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	groupsResp, err := testClient.GroupRead(ctx, []string{groupId})
+	assert.NoError(err)
+	assert.Equal(&models.TeamsReadGroupsResponse{}, groupsResp.JSON200)
 }
 
 func NewTestClient(t *testing.T) (*Client, *mocks.ClientWithResponsesInterface) {
