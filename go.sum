@@ -450,8 +450,8 @@ github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyC
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
-github.com/vektra/mockery/v2 v2.28.2 h1:PkSIS6ikVWQiGXzbDLJurprLSuvZxmoVAvlnsbz/otQ=
-github.com/vektra/mockery/v2 v2.28.2/go.mod h1:S1G0O8RZ66tpqfwSiJvi4bzjpk4ces+qEy0xoUG8wRg=
+github.com/vektra/mockery/v2 v2.29.0 h1:KSFga07FB0LPK6OzNoW8T7KQ2hFPhTykiwDSRFr3FSI=
+github.com/vektra/mockery/v2 v2.29.0/go.mod h1:S1G0O8RZ66tpqfwSiJvi4bzjpk4ces+qEy0xoUG8wRg=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/vmihailenco/msgpack v4.0.4+incompatible h1:dSLoQfGFAo3F6OoNhwUmLwVgaUXK79GlxNBwueZn0xI=
 github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
