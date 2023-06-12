@@ -47,7 +47,7 @@ provider "stax" {
 | Policies |
 | APIToken |
 | User | 
-| Group | ❌ | ✅
+| Group |  | ✅
 | NetworkHub |
 | Workload |
 | Workload Manifest |
