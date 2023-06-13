@@ -54,7 +54,7 @@ provider "stax" {
 
 # Limitations 
 
-1. The results of data sources is currently currently returning the first page from the Stax API, this is while we gauge impact and performance of the provider.
+1. The Terraform data sources currently only utilize the first page from the Stax API. However, this will change once we develop a strategy to manage large results while minimizing the impact on the Stax API.
 
 # Development
 
@@ -85,5 +85,5 @@ For more information on contributing the to the Stax Go SDK, please see our [gui
 # Getting Help
 
 * If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/developer/api-tokens/).<br>
-* If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/stax-golang-sdk/issues).<br>
+* If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/terraform-provider-stax/issues).<br>
 * For any other requests, please contact [Stax support](mailto:support@stax.io).
