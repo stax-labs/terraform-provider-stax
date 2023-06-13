@@ -31,7 +31,7 @@ variable "api_token_secret_key" {
 terraform {
   required_providers {
     stax = {
-      source = "registry.terraform.io/stax/stax"
+      source = "registry.terraform.io/stax-labs/stax"
     }
   }
 }
