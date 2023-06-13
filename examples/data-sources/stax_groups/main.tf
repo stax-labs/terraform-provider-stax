@@ -1,13 +1,13 @@
 variable "installation" {
-  description = "installation name"
+  description = "Stax Short Installation ID for your Stax tenancy's control plane"
 }
 
 variable "api_token_access_key" {
-  description = "api token access key"
+  description = "Stax API Token Access Key"
 }
 
 variable "api_token_secret_key" {
-  description = "api token secret key"
+  description = "Stax API Token Secret Key"
 }
 
 terraform {

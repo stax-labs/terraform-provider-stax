@@ -11,15 +11,15 @@ NOTE: This provider is built with the assumption that you are a Stax customer an
 
 ```terraform
 variable "installation" {
-  description = "installation region name"
+  description = "Stax Short Installation ID for your Stax tenancy's control plane"
 }
 
 variable "api_token_access_key" {
-  description = "api token access key"
+  description = "Stax API Token Access Key"
 }
 
 variable "api_token_secret_key" {
-  description = "api token secret key"
+  description = "Stax API Token Secret Key"
 }
 
 terraform {
@@ -57,6 +57,40 @@ provider "stax" {
 1. The Terraform data sources currently only utilize the first page from the Stax API. However, this will change once we develop a strategy to manage large results while minimizing the impact on the Stax API.
 
 # Development
+
+To build the terraform provider locally you will require.
+
+* Terraform >= 1.0
+* Go >= 1.20
+
+To build and install the provider use `make install`.
+
+To run the acceptance tests use `make testacc`
+
+To manually test the examples you will need to the provider path and setup some environment variables, then you will be able to use the targets in the `GNUMakefile` for testing.
+## Overriding the provider for local development
+
+You'll need to add a provider override to your `~/.terraformrc`. Documentation around using this file can be found [here](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers). See below for an example of a `.terraformrc` file set up for plugin override.
+
+Update the `CHANGE_ME_TO_GO_BIN` to `go env GOPATH` with `\bin` appended, shell command below will emit the correct value.
+
+```
+echo $(go env GOPATH)\bin
+``
+
+```hcl
+provider_installation {
+
+        dev_overrides {
+                "stax-labs/stax" = "CHANGE_ME_TO_GO_BIN"
+        }
+
+        direct {}
+}
+
+```
+
+## Manual Testing Environment Variables
 
 To provide the required secrets during development and integration testing some environment variables are required to run examples. These can be configured using an `.envrc` file which is loaded by [direnv](https://direnv.net/).
 
