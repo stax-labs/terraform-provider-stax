@@ -92,7 +92,11 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		SecretKey: data.APITokenSecretKey.ValueString(),
 	}
 
-	client, err := staxsdk.NewClient(apiToken, staxsdk.WithInstallation(data.Installation.ValueString()))
+	client, err := staxsdk.NewClient(
+		apiToken,
+		staxsdk.WithInstallation(data.Installation.ValueString()),
+		staxsdk.WithUserAgentVersion(fmt.Sprintf("terraform-provider-stax/%s", p.version)),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create client, got error: %s", err))
 		return

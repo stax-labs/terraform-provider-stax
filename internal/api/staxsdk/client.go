@@ -7,6 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
+	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -95,7 +98,13 @@ func WithAuthFn(authFn AuthFn) ClientOption {
 	}
 }
 
-// WithHttpClient sets the HTTP client used to make requests.
+// WithUserAgentVersion sets the user agent version used by the client.
+func WithUserAgentVersion(userAgentVersion string) ClientOption {
+	return func(c *Client) {
+		c.userAgentVersion = userAgentVersion
+	}
+}
+
 func WithHttpClient(httpClient *http.Client) ClientOption {
 	return func(c *Client) {
 		c.httpClient = httpClient
@@ -128,6 +137,7 @@ var _ ClientInterface = &Client{}
 type Client struct {
 	installation      string
 	endpointURL       string
+	userAgentVersion  string
 	httpClient        *http.Client
 	client            client.ClientWithResponsesInterface
 	apiToken          *auth.APIToken
@@ -135,19 +145,28 @@ type Client struct {
 	authFn            AuthFn
 }
 
-//	NewClient creates a new Sync API client.
+//	NewClient creates a new STAX API client.
 //
-// It requires an auth.APIToken and accepts optional ClientOptions.
-// If no apiToken is provided, it will return an ErrMissingAPIToken error.
-// The ClientOptions are used to configure the client and include:
-//   - WithClient: Sets the client.ClientWithResponses
-//   - WithTaskPollFn: Sets the TaskPollFn used to poll async tasks
-//   - WithAuthFn: Sets the AuthFn used to authenticate requests
+// apiToken: The API token to use for authentication.
+// opts: Optional configuration for the client.
+//
+// Returns:
+// - client: The STAX API client.
+// - err: Any error that occurred.
+//
+// The client can be configured using the opts. The available options are:
+//
+// - WithInstallation: Sets the STAX installation used by the client. Options are "dev", "test", "au1", "eu1" or "us1".
+// - WithEndpointURL: Sets the endpoint URL for the STAX API.
+// - WithAuthRequestSigner: Sets the request signer used to sign API Gateway requests.
+// - WithUserAgentVersion: Sets the user agent version used in requests.
+// - WithHttpClient: Sets the HTTP client used to make requests.
 func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 	c := &Client{
-		apiToken:   apiToken,
-		authFn:     auth.AuthAPIToken,
-		httpClient: http.DefaultClient,
+		apiToken:         apiToken,
+		authFn:           auth.AuthAPIToken,
+		httpClient:       http.DefaultClient,
+		userAgentVersion: "stax-golang-sdk/0.0.1",
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -162,12 +181,11 @@ func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 		return nil, err
 	}
 
-	c.client, err = client.NewClientWithResponses(url, client.WithHTTPClient(c.httpClient), client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("User-Agent", "stax-golang-sdk/0.0.1")
-		return nil
-	}))
-	if err != nil {
-		return nil, err
+	if c.client == nil {
+		c.client, err = client.NewClientWithResponses(url, client.WithHTTPClient(c.httpClient), buildUserAgentRequestEditor(c.userAgentVersion))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return c, nil
@@ -612,4 +630,29 @@ func getInstallationURL(installation, endpointURL string) (string, error) {
 	}
 
 	return "", ErrInvalidInstallation
+}
+
+func buildUserAgentRequestEditor(tag string) client.ClientOption {
+	return client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("User-Agent", buildUserAgentVersion(tag))
+		return nil
+	})
+}
+
+// buildUserAgentVersion build user agent
+//
+// stax-golang-sdk/0.0.1 md/GOOS/linux md/GOARCH/amd64 lang/go/1.15.
+func buildUserAgentVersion(userAgentVersion string) string {
+
+	tokens := []string{userAgentVersion}
+
+	if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		tokens = append(tokens,
+			fmt.Sprintf("md/GOOS/%s", runtime.GOOS),
+			fmt.Sprintf("md/GOARCH/%s", runtime.GOARCH),
+			fmt.Sprintf("lang/go/%s", buildInfo.GoVersion),
+		)
+	}
+
+	return strings.Join(tokens, " ")
 }
