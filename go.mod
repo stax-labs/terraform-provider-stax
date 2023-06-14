@@ -19,7 +19,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/stretchr/testify v1.8.4
 	github.com/valyala/fasttemplate v1.2.2
-	github.com/vektra/mockery/v2 v2.28.2
+	github.com/vektra/mockery/v2 v2.30.1
 )
 
 require (
@@ -106,7 +106,6 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/rs/zerolog v1.29.0 // indirect
