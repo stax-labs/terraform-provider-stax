@@ -5,15 +5,25 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
+)
+
+const (
+	endpointURLEnvVar  = "STAX_ENDPOINT_URL"
+	installationEnvVar = "STAX_INSTALLATION"
+	accessKeyEnvVar    = "STAX_ACCESS_KEY"
+	secretKeyEnvVar    = "STAX_SECRET_KEY"
 )
 
 // Ensure StaxProvider satisfies various provider interfaces.
@@ -30,6 +40,7 @@ type StaxProvider struct {
 // StaxProviderModel describes the provider data model.
 type StaxProviderModel struct {
 	Installation      types.String `tfsdk:"installation"`
+	EndpointURL       types.String `tfsdk:"endpoint_url"`
 	APITokenAccessKey types.String `tfsdk:"api_token_access_key"`
 	APITokenSecretKey types.String `tfsdk:"api_token_secret_key"`
 }
@@ -43,16 +54,36 @@ func (p *StaxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"installation": schema.StringAttribute{
-				MarkdownDescription: "[Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane",
+				MarkdownDescription: fmt.Sprintf("[Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane. Alternatively, can be configured using the `%s` environment variable. Must provide only one of `installation` or `endpoint_url`.", installationEnvVar),
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"au1", "us1", "eu1"}...),
+				},
+			},
+			"endpoint_url": schema.StringAttribute{
+				MarkdownDescription: fmt.Sprintf("Stax API endpoint for your Stax tenancy's control plane, this is used for testing and customers should use `installation`. Alternatively, can be configured using the `%s` environment variable. Must provide only one of `installation` or `endpoint_url`.", endpointURLEnvVar),
 				Optional:            true,
 			},
 			"api_token_access_key": schema.StringAttribute{
-				MarkdownDescription: "Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key",
+				MarkdownDescription: fmt.Sprintf("Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key. Alternatively, can be configured using the `%s` environment variable.", accessKeyEnvVar),
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`),
+						"must be a valid UUID v4",
+					),
+				},
 			},
 			"api_token_secret_key": schema.StringAttribute{
-				MarkdownDescription: "Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key",
+				MarkdownDescription: fmt.Sprintf("Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key. Alternatively, can be configured using the `%s` environment variable.", secretKeyEnvVar),
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z0-9]*$`),
+						"must only contain only alphanumeric characters",
+					),
+				},
+				Sensitive: true,
 			},
 		},
 	}
@@ -82,19 +113,19 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	tflog.Trace(ctx, "connecting to stax API", map[string]interface{}{
-		"installation": data.Installation.String(),
-		"access_key":   data.APITokenAccessKey.String(),
-	})
+	installationOpt := resolveEndpointConfiguration(data, resp)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	apiToken := &auth.APIToken{
-		AccessKey: data.APITokenAccessKey.ValueString(),
-		SecretKey: data.APITokenSecretKey.ValueString(),
+	apiToken := resolveAPIToken(data, resp)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	client, err := staxsdk.NewClient(
 		apiToken,
-		staxsdk.WithInstallation(data.Installation.ValueString()),
+		installationOpt,
 		staxsdk.WithUserAgentVersion(fmt.Sprintf("terraform-provider-stax/%s", p.version)),
 	)
 	if err != nil {
@@ -125,6 +156,72 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewAccountTypesDataSource,
 		NewGroupsDataSource,
 	}
+}
+
+func resolveEndpointConfiguration(data StaxProviderModel, resp *provider.ConfigureResponse) staxsdk.ClientOption {
+
+	// if an endpoint is configured use it
+	if !data.EndpointURL.IsNull() {
+		return staxsdk.WithEndpointURL(data.EndpointURL.ValueString())
+	}
+
+	// if an installation is configured use it
+	if !data.Installation.IsNull() {
+		return staxsdk.WithInstallation(data.Installation.ValueString())
+	}
+
+	if endpointURL := os.Getenv(endpointURLEnvVar); endpointURL != "" {
+		return staxsdk.WithEndpointURL(endpointURL)
+	}
+
+	if installation := os.Getenv(installationEnvVar); installation != "" {
+		return staxsdk.WithInstallation(installation)
+	}
+
+	resp.Diagnostics.AddAttributeError(
+		path.Root("installation"),
+		"Unknown Stax Installation",
+		"The provider cannot create the Stax API client as there is an unknown configuration value for the Stax Installation. "+
+			fmt.Sprintf("Either target apply the source of the value first, set the value statically in the configuration, or use the %s environment variable.", installationEnvVar),
+	)
+
+	return nil
+}
+
+func resolveAPIToken(data StaxProviderModel, resp *provider.ConfigureResponse) *auth.APIToken {
+
+	apiToken := &auth.APIToken{
+		AccessKey: os.Getenv(accessKeyEnvVar),
+		SecretKey: os.Getenv(secretKeyEnvVar),
+	}
+
+	if !data.APITokenAccessKey.IsNull() {
+		apiToken.AccessKey = data.APITokenAccessKey.ValueString()
+	}
+
+	if !data.APITokenSecretKey.IsNull() {
+		apiToken.SecretKey = data.APITokenSecretKey.ValueString()
+	}
+
+	if apiToken.AccessKey == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_token_access_key"),
+			"Unknown Stax API Token Access Key",
+			"The provider cannot create the Stax API client as there is an unknown configuration value for the Stax API Token Access Key. "+
+				fmt.Sprintf("Either target apply the source of the value first, set the value statically in the configuration, or use the %s environment variable.", accessKeyEnvVar),
+		)
+	}
+
+	if apiToken.SecretKey == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_token_secret_key"),
+			"Unknown Stax API Token Secret Key",
+			"The provider cannot create the Stax API client as there is an unknown configuration value for the Stax API Token Access Key. "+
+				fmt.Sprintf("Either target apply the source of the value first, set the value statically in the configuration, or use the %s environment variable.", secretKeyEnvVar),
+		)
+	}
+
+	return apiToken
 }
 
 func New(version string) func() provider.Provider {

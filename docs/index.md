@@ -53,6 +53,7 @@ provider "stax" {
 
 ### Optional
 
-- `api_token_access_key` (String) Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key
-- `api_token_secret_key` (String) Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key
-- `installation` (String) [Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane
+- `api_token_access_key` (String) Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key. Alternatively, can be configured using the `STAX_ACCESS_KEY` environment variable.
+- `api_token_secret_key` (String, Sensitive) Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key. Alternatively, can be configured using the `STAX_SECRET_KEY` environment variable.
+- `endpoint_url` (String) Stax API endpoint for your Stax tenancy's control plane, this is used for testing and customers should use `installation`. Alternatively, can be configured using the `STAX_ENDPOINT_URL` environment variable. Must provide only one of `installation` or `endpoint_url`.
+- `installation` (String) [Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane. Alternatively, can be configured using the `STAX_INSTALLATION` environment variable. Must provide only one of `installation` or `endpoint_url`.
