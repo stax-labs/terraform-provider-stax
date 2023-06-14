@@ -7,25 +7,30 @@ description: |-
 
 # Stax Provider
 
-The Stax terraform provider is used to interact with resources supported by Stax. The provider needs to be configured with an [API Token](https://www.stax.io/developer/api-tokens/) before it can be used.
+The Stax terraform provider is used to interact with resources supported by Stax.
 
 ## Getting Started
 
-TBA
+If your new to terraform then the hashicorp developer site has a great guide to getting up and running [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) with AWS.
+
+Once you have terraform installed you will require the following.
+
+1. An [API Token](https://www.stax.io/developer/api-tokens/) which can be created in the stax console. The token must have the `Read Only (API)` role to read using datasources, or `Admin (API)` role to create and manage accounts.
+2. The [Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) which hosts your Stax tenancy.
 
 ## Example Usage
 
 ```terraform
 variable "installation" {
-  description = "installation name"
+  description = "Stax Short Installation ID for your Stax tenancy's control plane"
 }
 
 variable "api_token_access_key" {
-  description = "api token access key"
+  description = "Stax API Token Access Key"
 }
 
 variable "api_token_secret_key" {
-  description = "api token secret key"
+  description = "Stax API Token Secret Key"
 }
 
 terraform {
@@ -48,6 +53,6 @@ provider "stax" {
 
 ### Optional
 
-- `api_token_access_key` (String) API Token Access Key
-- `api_token_secret_key` (String) API Token Secret Key
-- `installation` (String) Stax Installation Region
+- `api_token_access_key` (String) Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key
+- `api_token_secret_key` (String) Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key
+- `installation` (String) [Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane

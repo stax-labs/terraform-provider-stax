@@ -43,15 +43,15 @@ func (p *StaxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"installation": schema.StringAttribute{
-				MarkdownDescription: "Stax Installation Region",
+				MarkdownDescription: "[Stax Short Installation ID](https://support.stax.io/hc/en-us/articles/4537150525071-Stax-Installation-Regions) for your Stax tenancy's control plane",
 				Optional:            true,
 			},
 			"api_token_access_key": schema.StringAttribute{
-				MarkdownDescription: "API Token Access Key",
+				MarkdownDescription: "Stax [API Token](https://www.stax.io/developer/api-tokens/) Access Key",
 				Optional:            true,
 			},
 			"api_token_secret_key": schema.StringAttribute{
-				MarkdownDescription: "API Token Secret Key",
+				MarkdownDescription: "Stax [API Token](https://www.stax.io/developer/api-tokens/) Secret Key",
 				Optional:            true,
 			},
 		},
