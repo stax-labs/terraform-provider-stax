@@ -617,10 +617,6 @@ func getInstallationURL(installation, endpointURL string) (string, error) {
 	}
 
 	switch installation {
-	case "dev":
-		return "https://api.core.dev.juma.cloud", nil
-	case "test":
-		return "https://api.core.test.juma.cloud", nil
 	case "au1":
 		return "https://api.au1.staxapp.cloud", nil
 	case "us1":

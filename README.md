@@ -37,6 +37,8 @@ provider "stax" {
 }
 ```
 
+The provider can also be configured using the equivalent environment variables as per the [Stax Provider](docs/index.md).
+
 # Supported Resources
 
 | Type | Resource | Data Source

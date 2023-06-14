@@ -26,6 +26,10 @@ type APIToken struct {
 	SecretKey string
 }
 
+func (a *APIToken) IsValid() bool {
+	return a.AccessKey != "" && a.SecretKey != ""
+}
+
 // AuthResponse authentication response containing the aws sdk configuration loaded with credentials.
 type AuthResponse struct {
 	AWSConfig aws.Config
