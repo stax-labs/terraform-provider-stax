@@ -30,7 +30,7 @@ func NewAccountTypeResource() resource.Resource {
 	return &AccountTypeResource{}
 }
 
-// AccountResource defines the resource implementation.
+// AccountTypeResource defines the resource implementation.
 type AccountTypeResource struct {
 	client staxsdk.ClientInterface
 }

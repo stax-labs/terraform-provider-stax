@@ -52,3 +52,4 @@ Read-Only:
 - `id` (String) The identifier of the stax group
 - `name` (String) The name of the stax group
 - `status` (String) The status of the stax group
+- `type` (String) The type of stax group, this can be either `LOCAL` or `SCIM`. Note that groups with a type of `SCIM` cannot be updated.

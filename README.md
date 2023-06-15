@@ -49,7 +49,7 @@ The provider can also be configured using the equivalent environment variables a
 | Policies |
 | APIToken |
 | User | 
-| Group |  | ✅
+| Group | ✅ | ✅
 | NetworkHub |
 | Workload |
 | Workload Manifest |
