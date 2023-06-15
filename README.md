@@ -74,11 +74,13 @@ To manually test the examples you will need to the provider path and setup some 
 
 You'll need to add a provider override to your `~/.terraformrc`. Documentation around using this file can be found [here](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers). See below for an example of a `.terraformrc` file set up for plugin override.
 
-Update the `CHANGE_ME_TO_GO_BIN` to `go env GOPATH` with `\bin` appended, shell command below will emit the correct value.
+Get the path to the `bin` directory for your `GOPATH` used by the Go SDK to store tools and cache packages. The following handy shell command below will emit the correct value on Linux or OSX.
 
-```
+```shell
 echo $(go env GOPATH)\bin
-``
+```
+
+Update the `CHANGE_ME_TO_GO_BIN` to `bin` directory for your `GOPATH`.
 
 ```hcl
 provider_installation {
