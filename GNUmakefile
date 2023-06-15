@@ -44,14 +44,31 @@ account-type-resource-plan:
 account-type-resource-apply:
 	terraform -chdir=examples/resources/stax_account_type apply
 
+
+# Run example stax_group resource plan
+.PHONY: group-resource-plan
+group-resource-plan:
+	terraform -chdir=examples/resources/stax_group plan
+
+# Run example stax_group resource apply
+.PHONY: group-resource-apply
+group-resource-apply:
+	terraform -chdir=examples/resources/stax_group apply
+
 # Run example stax_account import
 .PHONY: account-resource-import
 account-resource-import:
 	rm -rf examples/resources/stax_account/*.tfstate
 	cd examples/resources/stax_account && terraform import -var="account_type_id=$(ACCOUNT_TYPE_ID)" stax_account.presentation-dev $(IMPORT_STAX_ACCOUNT_ID)
 
-# Run example stax_account import
+# Run example stax_account_type import
 .PHONY: account-type-resource-import
 account-type-resource-import:
 	rm -rf examples/resources/stax_account_type/*.tfstate
 	cd examples/resources/stax_account_type && terraform import stax_account_type.production $(IMPORT_STAX_ACCOUNT_TYPE_ID)
+
+# Run example stax_group import
+.PHONY: group-resource-import
+group-resource-import:
+	rm -rf examples/resources/stax_group/*.tfstate
+	cd examples/resources/stax_group && terraform import stax_group.cost-data-scientist $(IMPORT_STAX_GROUP_ID)

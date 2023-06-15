@@ -27,6 +27,7 @@ type GroupDataSourceModel struct {
 	ID     types.String `tfsdk:"id"`
 	Name   types.String `tfsdk:"name"`
 	Status types.String `tfsdk:"status"`
+	Type   types.String `tfsdk:"type"`
 }
 
 // GroupsDataSourceModel describes the data source data model.
@@ -77,6 +78,10 @@ func (d *GroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						},
 						"status": schema.StringAttribute{
 							MarkdownDescription: "The status of the stax group",
+							Computed:            true,
+						},
+						"type": schema.StringAttribute{
+							MarkdownDescription: "The type of stax group, this can be either `LOCAL` or `SCIM`. Note that groups with a type of `SCIM` cannot be updated.",
 							Computed:            true,
 						},
 					},
@@ -138,6 +143,7 @@ func (d *GroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			ID:     types.StringValue(aws.ToString(group.Id)),
 			Name:   types.StringValue(group.Name),
 			Status: types.StringValue(string(group.Status)),
+			Type:   types.StringValue(string(group.GroupType)),
 		})
 	}
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/cognito"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/mocks"
@@ -47,7 +48,6 @@ func TestClient_Authenticate(t *testing.T) {
 func TestClient_PublicReadConfig(t *testing.T) {
 	assert := require.New(t)
 
-	ctx := context.Background()
 	testClient, clientWithResponsesMock := NewTestClient(t)
 
 	clientWithResponsesMock.On("PublicReadConfigWithResponse", mock.AnythingOfType("*context.emptyCtx")).
@@ -56,7 +56,7 @@ func TestClient_PublicReadConfig(t *testing.T) {
 			HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 		}, nil)
 
-	publicConfigResp, err := testClient.PublicReadConfig(ctx)
+	publicConfigResp, err := testClient.PublicReadConfig(context.TODO())
 	assert.NoError(err)
 
 	assert.Equal(&models.PublicReadConfig{}, publicConfigResp.JSON200)
@@ -65,7 +65,6 @@ func TestClient_PublicReadConfig(t *testing.T) {
 func TestClient_AccountCreate(t *testing.T) {
 	assert := require.New(t)
 
-	ctx := context.Background()
 	testClient, clientWithResponsesMock := NewTestClient(t)
 
 	ac := models.AccountsCreateAccount_AccountType{}
@@ -88,7 +87,7 @@ func TestClient_AccountCreate(t *testing.T) {
 		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 	}, nil)
 
-	createResp, err := testClient.AccountCreate(ctx, createAccount)
+	createResp, err := testClient.AccountCreate(context.TODO(), createAccount)
 	assert.NoError(err)
 
 	assert.Equal("test", *createResp.JSON200.TaskId)
@@ -99,7 +98,6 @@ func TestClient_GroupRead(t *testing.T) {
 
 	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
 
-	ctx := context.Background()
 	testClient, clientWithResponsesMock := NewTestClient(t)
 
 	params := &models.TeamsReadGroupsParams{
@@ -115,9 +113,102 @@ func TestClient_GroupRead(t *testing.T) {
 		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 	}, nil)
 
-	groupsResp, err := testClient.GroupRead(ctx, []string{groupId})
+	groupsResp, err := testClient.GroupRead(context.TODO(), []string{groupId})
 	assert.NoError(err)
 	assert.Equal(&models.TeamsReadGroupsResponse{}, groupsResp.JSON200)
+}
+
+func TestClient_GroupCreate(t *testing.T) {
+	assert := require.New(t)
+	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+	groupName := "group-new-name"
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	clientWithResponsesMock.On("TeamsCreateGroupWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		models.TeamsCreateGroup{Name: groupName},
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsCreateGroupResp{
+		JSON200:      &models.TeamsCreateGroupEvent{GroupId: &groupId},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	createResp, err := testClient.GroupCreate(context.TODO(), groupName)
+	assert.NoError(err)
+	assert.Equal(&models.TeamsCreateGroupEvent{GroupId: &groupId}, createResp.JSON200)
+}
+
+func TestClient_GroupUpdate(t *testing.T) {
+	assert := require.New(t)
+	groupName := "group-updated-name"
+	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	clientWithResponsesMock.On("TeamsUpdateGroupWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		groupId,
+		models.TeamsUpdateGroup{Name: groupName},
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsUpdateGroupResp{
+		JSON200:      &models.TeamsUpdateGroupEvent{},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	updateResp, err := testClient.GroupUpdate(context.TODO(), groupId, groupName)
+	assert.NoError(err)
+	assert.Equal(&models.TeamsUpdateGroupEvent{}, updateResp.JSON200)
+}
+
+func TestClient_GroupDelete(t *testing.T) {
+	assert := require.New(t)
+	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	clientWithResponsesMock.On("TeamsDeleteGroupWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		groupId,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsDeleteGroupResp{
+		JSON200:      &models.TeamsDeleteGroupEvent{},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	deleteResp, err := testClient.GroupDelete(context.TODO(), groupId)
+	assert.NoError(err)
+	assert.Equal(&models.TeamsDeleteGroupEvent{}, deleteResp.JSON200)
+}
+
+func TestClient_UserCreate(t *testing.T) {
+	assert := require.New(t)
+	taskId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+	email := "test@example.com"
+
+	readonlyRole := models.IdamUserRole(models.Readonly)
+
+	params := models.TeamsCreateUser{
+		Email:     openapi_types.Email(email),
+		FirstName: "Test",
+		LastName:  "Test",
+		Role:      &readonlyRole,
+	}
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	clientWithResponsesMock.On("TeamsCreateUserWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		params,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsCreateUserResp{
+		JSON200:      &models.TeamsCreateUserEvent{TaskId: &taskId},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	userResp, err := testClient.UserCreate(context.TODO(), params)
+	assert.NoError(err)
+	assert.Equal(&models.TeamsCreateUserEvent{TaskId: &taskId}, userResp.JSON200)
 }
 
 func NewTestClient(t *testing.T) (*Client, *mocks.ClientWithResponsesInterface) {

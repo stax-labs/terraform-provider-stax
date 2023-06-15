@@ -144,11 +144,19 @@ func (r *AccountResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	tflog.Debug(ctx, "account create response", map[string]interface{}{
+		"JSON200": created.JSON200,
+	})
+
 	taskResp, err := waitForTask(ctx, *created.JSON200.TaskId, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to complete task, got error: %s", err))
 		return
 	}
+
+	tflog.Debug(ctx, "task response", map[string]interface{}{
+		"JSON200": taskResp,
+	})
 
 	accountsResp, err := r.client.AccountRead(ctx, *taskResp.Accounts, nil)
 	if err != nil {
@@ -215,9 +223,13 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 		Tags:        (*models.StaxTags)(&staxTags),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update account, got error: %s", err))
 		return
 	}
+
+	tflog.Debug(ctx, "account update response", map[string]interface{}{
+		"JSON200": accountResp.JSON200,
+	})
 
 	tflog.Info(ctx, "wait for account update", map[string]interface{}{
 		"id": data.ID.ValueString(),

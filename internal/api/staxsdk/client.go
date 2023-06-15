@@ -71,6 +71,14 @@ type ClientInterface interface {
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
 	// WorkloadDelete deletes a workload and returns a client.WorkloadsDeleteWorkloadResp.
 	WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error)
+	// GroupCreate create a group and returns a client.TeamsCreateGroupResp.
+	GroupCreate(ctx context.Context, name string) (*client.TeamsCreateGroupResp, error)
+	//  GroupUpdate updates a group and returns a client.TeamsUpdateGroupResp.
+	GroupUpdate(ctx context.Context, groupID, name string) (*client.TeamsUpdateGroupResp, error)
+	// GroupDelete deletes a group and returns a client.TeamsDeleteGroupResp.
+	GroupDelete(ctx context.Context, groupID string) (*client.TeamsDeleteGroupResp, error)
+	//  GroupReadByID reads a group by ID and returns a client.TeamsReadGroupResp.
+	GroupReadByID(ctx context.Context, groupID string) (*client.TeamsReadGroupResp, error)
 	//  GroupRead reads groups and returns a client.TeamsReadGroupsResp.
 	GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error)
 	//	MonitorTask polls an asynchronous task and returns the final task response.
@@ -516,6 +524,28 @@ func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*clien
 	return workloadDeleteResp, nil
 }
 
+//	GroupReadByID reads a group by ID from STAX.
+//
+// ctx is the context to use for this request.
+// groupID is the ID of the group to read.
+//
+// Returns:
+// - teamsReadResp: The response from the TeamsReadGroup API call.
+// - err: Any error that occurred.
+func (cl *Client) GroupReadByID(ctx context.Context, groupID string) (*client.TeamsReadGroupResp, error) {
+	teamsReadResp, err := cl.client.TeamsReadGroupWithResponse(ctx, groupID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, teamsReadResp, string(teamsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return teamsReadResp, nil
+}
+
 //	GroupRead reads groups from STAX.
 //
 // ctx: The context to use for this request.
@@ -541,6 +571,66 @@ func (cl *Client) GroupRead(ctx context.Context, groupIDs []string) (*client.Tea
 	}
 
 	return teamsReadResp, nil
+}
+
+func (cl *Client) GroupCreate(ctx context.Context, name string) (*client.TeamsCreateGroupResp, error) {
+	createGroupResp, err := cl.client.TeamsCreateGroupWithResponse(ctx, models.TeamsCreateGroup{
+		Name: name,
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, createGroupResp, string(createGroupResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return createGroupResp, nil
+}
+
+func (cl *Client) GroupUpdate(ctx context.Context, groupID, name string) (*client.TeamsUpdateGroupResp, error) {
+	updateGroupResp, err := cl.client.TeamsUpdateGroupWithResponse(ctx, groupID, models.TeamsUpdateGroup{
+		Name: name,
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, updateGroupResp, string(updateGroupResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return updateGroupResp, nil
+}
+
+func (cl *Client) GroupDelete(ctx context.Context, groupID string) (*client.TeamsDeleteGroupResp, error) {
+	deleteGroupResp, err := cl.client.TeamsDeleteGroupWithResponse(ctx, groupID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, deleteGroupResp, string(deleteGroupResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return deleteGroupResp, nil
+}
+
+func (cl *Client) UserCreate(ctx context.Context, params models.TeamsCreateUser) (*client.TeamsCreateUserResp, error) {
+	createUserResp, err := cl.client.TeamsCreateUserWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, createUserResp, string(createUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return createUserResp, nil
 }
 
 //	MonitorTask polls an asynchronous task and returns the final task response.
