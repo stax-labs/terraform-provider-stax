@@ -55,6 +55,8 @@ type ClientInterface interface {
 	PublicReadConfig(ctx context.Context) (*client.PublicReadConfigResp, error)
 	// AccountCreate creates an account and returns a SyncResult containing the response and final task status.
 	AccountCreate(ctx context.Context, createAccount models.AccountsCreateAccount) (*client.AccountsCreateAccountResp, error)
+	// AccountReadByID reads an account by ID and returns a client.AccountsReadAccountResp.
+	AccountReadByID(ctx context.Context, accountID string) (*client.AccountsReadAccountResp, error)
 	// AccountRead reads accounts and returns a client.AccountsReadAccountsResp.
 	AccountRead(ctx context.Context, accountIDs []string, accountNames []string) (*client.AccountsReadAccountsResp, error)
 	// AccountUpdate updates an account and returns a SyncResult containing the response and final task status.
@@ -67,6 +69,8 @@ type ClientInterface interface {
 	AccountTypeUpdate(ctx context.Context, accountTypeID, name string) (*client.AccountsUpdateAccountTypeResp, error)
 	//  AccountTypeDelete deletes an account type and returns a client.AccountsDeleteAccountTypeResp.
 	AccountTypeDelete(ctx context.Context, accountTypeID string) (*client.AccountsDeleteAccountTypeResp, error)
+	// AccountTypeReadById reads an account type by ID and returns a client.AccountsReadAccountTypeResp.
+	AccountTypeReadById(ctx context.Context, accountTypeID string) (*client.AccountsReadAccountTypeResp, error)
 	// AccountTypeRead reads account types and returns a client.AccountsReadAccountTypesResp.
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
 	// WorkloadDelete deletes a workload and returns a client.WorkloadsDeleteWorkloadResp.
@@ -261,6 +265,38 @@ func (cl *Client) AccountCreate(ctx context.Context, createAccount models.Accoun
 	return createResp, nil
 }
 
+//	AccountReadByID reads an account by ID from STAX.
+//
+// ctx: The context to use for this request.
+// accountID: The ID of the account to read.
+//
+// Returns:
+// - readAccountRes: The response from the AccountsReadAccount API call.
+// - err: Any error that occurred.
+func (cl *Client) AccountReadByID(ctx context.Context, accountID string) (*client.AccountsReadAccountResp, error) {
+	err := cl.checkSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	readAccountRes, err := cl.client.AccountsReadAccountWithResponse(ctx, accountID, &models.AccountsReadAccountParams{}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, readAccountRes, string(readAccountRes.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: API can return a list with zero entries if the identifier doesn't exist
+	if len(readAccountRes.JSON200.Accounts) != 1 {
+		return nil, fmt.Errorf("account not found for identifier: %s", accountID)
+	}
+
+	return readAccountRes, nil
+}
+
 //	AccountRead reads accounts from STAX.
 //
 // ctx: The context to use for this request.
@@ -353,6 +389,39 @@ func (cl *Client) AccountClose(ctx context.Context, accountID string) (*client.A
 	}
 
 	return accountCloseResp, nil
+}
+
+//	AccountTypeReadById reads an account type by ID.
+//
+// ctx: The context for the request
+// accountTypeID: The ID of the account type to read
+//
+// It returns:
+//
+// - *client.AccountsReadAccountTypeResp: The response containing the requested account type
+// - error: Any error that occurred while making the request.
+func (cl *Client) AccountTypeReadById(ctx context.Context, accountTypeID string) (*client.AccountsReadAccountTypeResp, error) {
+	err := cl.checkSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	accountTypeResp, err := cl.client.AccountsReadAccountTypeWithResponse(ctx, accountTypeID, &models.AccountsReadAccountTypeParams{}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, accountTypeResp, string(accountTypeResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: API can return a list with zero entries if the identifier doesn't exist
+	if len(accountTypeResp.JSON200.AccountTypes) != 1 {
+		return nil, fmt.Errorf("account type not found for identifier: %s", accountTypeID)
+	}
+
+	return accountTypeResp, nil
 }
 
 //	AccountTypeRead reads account types from STAX.
@@ -533,17 +602,21 @@ func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*clien
 // - teamsReadResp: The response from the TeamsReadGroup API call.
 // - err: Any error that occurred.
 func (cl *Client) GroupReadByID(ctx context.Context, groupID string) (*client.TeamsReadGroupResp, error) {
-	teamsReadResp, err := cl.client.TeamsReadGroupWithResponse(ctx, groupID, cl.authRequestSigner)
+	groupReadResp, err := cl.client.TeamsReadGroupWithResponse(ctx, groupID, cl.authRequestSigner)
 	if err != nil {
 		return nil, err
 	}
 
-	err = checkResponse(ctx, teamsReadResp, string(teamsReadResp.Body))
+	if groupReadResp.StatusCode() == 404 {
+		return nil, fmt.Errorf("group not found for identifier: %s", groupID)
+	}
+
+	err = checkResponse(ctx, groupReadResp, string(groupReadResp.Body))
 	if err != nil {
 		return nil, err
 	}
 
-	return teamsReadResp, nil
+	return groupReadResp, nil
 }
 
 //	GroupRead reads groups from STAX.

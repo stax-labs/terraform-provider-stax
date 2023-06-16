@@ -62,6 +62,33 @@ func TestClient_PublicReadConfig(t *testing.T) {
 	assert.Equal(&models.PublicReadConfig{}, publicConfigResp.JSON200)
 }
 
+func TestClient_AccountReadByID(t *testing.T) {
+	assert := require.New(t)
+	accountID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	accounts := &models.AccountsReadAccounts{
+		Accounts: []models.Account{
+			{Id: &accountID},
+		},
+	}
+
+	clientWithResponsesMock.On("AccountsReadAccountWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		accountID,
+		mock.AnythingOfType("*models.AccountsReadAccountParams"),
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.AccountsReadAccountResp{
+		JSON200:      accounts,
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	accountResp, err := testClient.AccountReadByID(context.TODO(), accountID)
+	assert.NoError(err)
+	assert.Equal(accounts, accountResp.JSON200)
+}
+
 func TestClient_AccountCreate(t *testing.T) {
 	assert := require.New(t)
 
@@ -91,6 +118,33 @@ func TestClient_AccountCreate(t *testing.T) {
 	assert.NoError(err)
 
 	assert.Equal("test", *createResp.JSON200.TaskId)
+}
+
+func TestClient_AccountTypeReadById(t *testing.T) {
+	assert := require.New(t)
+	accountTypeID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	accountTypes := &models.AccountsReadAccountTypes{
+		AccountTypes: []models.AccountType{
+			{Id: &accountTypeID},
+		},
+	}
+
+	clientWithResponsesMock.On("AccountsReadAccountTypeWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		accountTypeID,
+		mock.AnythingOfType("*models.AccountsReadAccountTypeParams"),
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.AccountsReadAccountTypeResp{
+		JSON200:      accountTypes,
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	accountTypeResp, err := testClient.AccountTypeReadById(context.TODO(), accountTypeID)
+	assert.NoError(err)
+	assert.Equal(accountTypes, accountTypeResp.JSON200)
 }
 
 func TestClient_GroupRead(t *testing.T) {

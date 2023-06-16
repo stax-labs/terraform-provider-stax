@@ -31,8 +31,10 @@ func TestAccountResource(t *testing.T) {
 
 	si := mocks.NewServerInterface(t)
 
+	accountID := "f646e0cf-840c-401a-933c-1ef3432b5a37"
+
 	si.On("AccountsCreateAccount", mock.AnythingOfType("*echo.context")).Return(func(c echo.Context) error {
-		return c.JSON(200, &models.AccountsCreateAccountResponse{TaskId: aws.String("4f2e7318-1e25-4b62-84b5-1cd701042760")})
+		return c.JSON(200, &models.AccountsCreateAccountResponse{TaskId: aws.String(accountID)})
 	})
 
 	si.On("TasksReadTask", mock.AnythingOfType("*echo.context"), mock.AnythingOfType("string")).Return(func(c echo.Context, taskId string) error {
@@ -50,11 +52,11 @@ func TestAccountResource(t *testing.T) {
 		})
 	})
 
-	si.On("AccountsReadAccounts", mock.AnythingOfType("*echo.context"), mock.AnythingOfType("models.AccountsReadAccountsParams")).Return(func(c echo.Context, params models.AccountsReadAccountsParams) error {
+	si.On("AccountsReadAccount", mock.AnythingOfType("*echo.context"), accountID, mock.AnythingOfType("models.AccountsReadAccountParams")).Return(func(c echo.Context, accountID string, params models.AccountsReadAccountParams) error {
 		return c.JSON(200, &models.AccountsReadAccounts{
 			Accounts: []models.Account{
 				{
-					Id:          aws.String("f646e0cf-840c-401a-933c-1ef3432b5a37"),
+					Id:          aws.String(accountID),
 					Name:        "presentation-dev",
 					Status:      (*models.AccountStatus)(aws.String("ACTIVE")),
 					AccountType: aws.String("production"),

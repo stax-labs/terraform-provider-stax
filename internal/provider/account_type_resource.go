@@ -98,16 +98,10 @@ func (r *AccountTypeResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{aws.ToString(accountTypeCreate.JSON200.Detail.AccountType.Id)})
+	err = r.readAccountType(ctx, aws.ToString(accountTypeCreate.JSON200.Detail.AccountType.Id), data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account type, got error: %s", err))
 		return
-	}
-
-	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(aws.ToString(accountType.Id))
-		data.Name = types.StringValue(accountType.Name)
-		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
 
 	// Save data into Terraform state
@@ -124,16 +118,10 @@ func (r *AccountTypeResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{data.ID.ValueString()})
+	err := r.readAccountType(ctx, data.ID.ValueString(), data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account type, got error: %s", err))
 		return
-	}
-
-	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(aws.ToString(accountType.Id))
-		data.Name = types.StringValue(accountType.Name)
-		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
 
 	// Save updated data into Terraform state
@@ -150,22 +138,16 @@ func (r *AccountTypeResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	accountResp, err := r.client.AccountTypeUpdate(ctx, data.ID.ValueString(), data.Name.ValueString())
+	accountTypeUpdateResp, err := r.client.AccountTypeUpdate(ctx, data.ID.ValueString(), data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update account type, got error: %s", err))
 		return
 	}
 
-	accountTypesRead, err := r.client.AccountTypeRead(ctx, []string{aws.ToString(accountResp.JSON200.AccountTypes.Id)})
+	err = r.readAccountType(ctx, aws.ToString(accountTypeUpdateResp.JSON200.AccountTypes.Id), data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account type, got error: %s", err))
 		return
-	}
-
-	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
-		data.ID = types.StringValue(aws.ToString(accountType.Id))
-		data.Name = types.StringValue(accountType.Name)
-		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
 	}
 
 	// Save updated data into Terraform state
@@ -195,4 +177,24 @@ func (r *AccountTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 
 func (r *AccountTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *AccountTypeResource) readAccountType(ctx context.Context, accountTypeID string, data *AccountTypeResourceModel) error {
+	accountTypesRead, err := r.client.AccountTypeReadById(ctx, accountTypeID)
+	if err != nil {
+		return err
+	}
+
+	tflog.Info(ctx, "reading account types", map[string]interface{}{
+		"accountID": accountTypeID,
+		"count":     len(accountTypesRead.JSON200.AccountTypes),
+	})
+
+	for _, accountType := range accountTypesRead.JSON200.AccountTypes {
+		data.ID = types.StringValue(aws.ToString(accountType.Id))
+		data.Name = types.StringValue(accountType.Name)
+		data.Status = types.StringValue(fmt.Sprintf("%s", accountType.Status))
+	}
+
+	return nil
 }
