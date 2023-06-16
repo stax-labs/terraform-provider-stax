@@ -158,19 +158,14 @@ func (r *AccountResource) Create(ctx context.Context, req resource.CreateRequest
 		"JSON200": taskResp,
 	})
 
-	accountsResp, err := r.client.AccountRead(ctx, *taskResp.Accounts, nil)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
+	if taskResp.Accounts == nil {
+		resp.Diagnostics.AddError("Client Error", "Unable to complete task, nil account ids in task")
 		return
 	}
 
-	tflog.Info(ctx, "reading accounts", map[string]interface{}{
-		"count": len(accountsResp.JSON200.Accounts),
-	})
+	accounts := *taskResp.Accounts
 
-	data.ID = types.StringValue(aws.ToString(accountsResp.JSON200.Accounts[0].Id))
-
-	err = r.readAccount(ctx, data)
+	err = r.readAccount(ctx, accounts[0], data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
 		return
@@ -190,7 +185,7 @@ func (r *AccountResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	err := r.readAccount(ctx, data)
+	err := r.readAccount(ctx, data.ID.ValueString(), data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
 		return
@@ -245,7 +240,7 @@ func (r *AccountResource) Update(ctx context.Context, req resource.UpdateRequest
 		"id": data.ID.ValueString(),
 	})
 
-	err = r.readAccount(ctx, data)
+	err = r.readAccount(ctx, data.ID.ValueString(), data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read account, got error: %s", err))
 		return
@@ -278,14 +273,15 @@ func (r *AccountResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *AccountResource) readAccount(ctx context.Context, data *AccountResourceModel) error {
-	accountsResp, err := r.client.AccountRead(ctx, []string{data.ID.ValueString()}, nil)
+func (r *AccountResource) readAccount(ctx context.Context, accountID string, data *AccountResourceModel) error {
+	accountsResp, err := r.client.AccountReadByID(ctx, accountID)
 	if err != nil {
 		return err
 	}
 
 	tflog.Info(ctx, "reading accounts", map[string]interface{}{
-		"count": len(accountsResp.JSON200.Accounts),
+		"accountID": accountID,
+		"count":     len(accountsResp.JSON200.Accounts),
 	})
 
 	accountTypesResp, err := r.client.AccountTypeRead(ctx, []string{})

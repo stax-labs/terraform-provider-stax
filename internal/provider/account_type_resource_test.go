@@ -34,7 +34,7 @@ func TestAccountTypeResource(t *testing.T) {
 		}})
 	})
 
-	si.On("AccountsReadAccountTypes", mock.AnythingOfType("*echo.context"), mock.AnythingOfType("models.AccountsReadAccountTypesParams")).Return(func(c echo.Context, params models.AccountsReadAccountTypesParams) error {
+	si.On("AccountsReadAccountType", mock.AnythingOfType("*echo.context"), accountTypeID, mock.AnythingOfType("models.AccountsReadAccountTypeParams")).Return(func(c echo.Context, accountTypeID string, params models.AccountsReadAccountTypeParams) error {
 		return c.JSON(200, &models.AccountsReadAccountTypes{
 			AccountTypes: []models.AccountType{
 				{
