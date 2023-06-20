@@ -47,12 +47,12 @@ func (d *GroupsDataSource) Metadata(ctx context.Context, req datasource.Metadata
 
 func (d *GroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Accounts datasource",
+		MarkdownDescription: "Groups datasource",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Account identifier used to select an account, this takes precedence over filters",
+				MarkdownDescription: "Group identifier used to select an group, this takes precedence over filters",
 			},
 			"filters": schema.SingleNestedAttribute{
 				Optional: true,

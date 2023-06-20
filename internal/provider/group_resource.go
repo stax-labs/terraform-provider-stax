@@ -52,7 +52,7 @@ func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the account",
+				MarkdownDescription: "The name of the group",
 				Required:            true,
 			},
 			"type": schema.StringAttribute{

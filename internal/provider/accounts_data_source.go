@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 
@@ -230,4 +231,18 @@ func (d *AccountsDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func staxTagsToMap(tags *models.StaxTags) map[string]string {
+	accountTags := make(map[string]string)
+
+	if tags == nil {
+		return accountTags
+	}
+
+	for k, v := range *tags {
+		accountTags[k] = v
+	}
+
+	return accountTags
 }

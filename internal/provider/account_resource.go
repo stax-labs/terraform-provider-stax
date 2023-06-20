@@ -348,20 +348,6 @@ func waitForTask(ctx context.Context, taskID string, staxclient staxsdk.ClientIn
 	return finalTaskStatus.JSON200, nil
 }
 
-func staxTagsToMap(tags *models.StaxTags) map[string]string {
-	accountTags := make(map[string]string)
-
-	if tags == nil {
-		return accountTags
-	}
-
-	for k, v := range *tags {
-		accountTags[k] = v
-	}
-
-	return accountTags
-}
-
 func staxTagsToMapString(tags *models.StaxTags) map[string]attr.Value {
 	accountTags := make(map[string]attr.Value)
 

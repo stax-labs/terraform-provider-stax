@@ -3,12 +3,12 @@
 page_title: "stax_groups Data Source - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Accounts datasource
+  Groups datasource
 ---
 
 # stax_groups (Data Source)
 
-Accounts datasource
+Groups datasource
 
 ## Example Usage
 
@@ -30,7 +30,7 @@ data "stax_groups" "dedicated_dev" {
 ### Optional
 
 - `filters` (Attributes) (see [below for nested schema](#nestedatt--filters))
-- `id` (String) Account identifier used to select an account, this takes precedence over filters
+- `id` (String) Group identifier used to select an group, this takes precedence over filters
 
 ### Read-Only
 
