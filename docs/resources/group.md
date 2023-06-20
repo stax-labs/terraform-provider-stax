@@ -23,7 +23,7 @@ resource "stax_group" "cost-data-scientist" {
 
 ### Required
 
-- `name` (String) The name of the account
+- `name` (String) The name of the group
 
 ### Read-Only
 
