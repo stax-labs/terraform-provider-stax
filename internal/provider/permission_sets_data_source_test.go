@@ -20,11 +20,9 @@ func TestPermissionSetsDataSource(t *testing.T) {
 
 	si := mocks.NewServerInterface(t)
 
-	psetUUID := uuid.MustParse(permissionSetID)
-
 	si.On("GetPermissionSet",
 		mock.AnythingOfType("*echo.context"),
-		psetUUID,
+		uuid.MustParse(permissionSetID),
 	).Return(func(c echo.Context, permissionSetId uuid.UUID) error {
 		return c.JSON(200, &models.PermissionSetRecord{
 			Id: permissionSetId,

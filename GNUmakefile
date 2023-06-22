@@ -59,6 +59,16 @@ group-resource-plan:
 group-resource-apply:
 	terraform -chdir=examples/resources/stax_group apply
 
+# Run example stax_group resource plan
+.PHONY: permission_set-resource-plan
+permission_set-resource-plan:
+	terraform -chdir=examples/resources/stax_permission_set plan
+
+# Run example stax_permission_set resource apply
+.PHONY: permission_set-resource-apply
+permission_set-resource-apply:
+	terraform -chdir=examples/resources/stax_permission_set apply
+
 # Run example stax_account import
 .PHONY: account-resource-import
 account-resource-import:
@@ -76,3 +86,9 @@ account-type-resource-import:
 group-resource-import:
 	rm -rf examples/resources/stax_group/*.tfstate
 	cd examples/resources/stax_group && terraform import stax_group.cost-data-scientist $(IMPORT_STAX_GROUP_ID)
+
+# Run example stax_group import
+.PHONY: stax_permission_set-resource-import
+stax_permission_set-resource-import:
+	rm -rf examples/resources/stax_permission_set/*.tfstate
+	cd examples/resources/stax_permission_set && terraform import stax_permission_set.data-scientist $(IMPORT_STAX_PERMISSION_SET_ID)

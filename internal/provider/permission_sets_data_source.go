@@ -229,3 +229,13 @@ func convertToI64Ptr(i *int) *int64 {
 
 	return &i64
 }
+
+func convertToIPtr(i *int64) *int {
+	if i == nil {
+		return nil
+	}
+
+	i64 := int(*i)
+
+	return &i64
+}
