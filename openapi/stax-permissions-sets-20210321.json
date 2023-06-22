@@ -1,0 +1,1544 @@
+{
+    "components": {
+        "parameters": {
+            "AccountID": {
+                "description": "Stax Account ID",
+                "in": "query",
+                "name": "account_id",
+                "schema": {
+                    "$ref": "#/components/schemas/ID"
+                }
+            },
+            "AssignmentID": {
+                "description": "Assignment ID",
+                "in": "path",
+                "name": "assignment_id",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/ID"
+                }
+            },
+            "FilterAccountTypeID": {
+                "description": "Filter the returned results using the \"AccountTypeID\" attribute",
+                "example": [
+                    "12345678-1234-1234-1234-123456789012",
+                    "87654321-4321-4321-4321-210987654321"
+                ],
+                "in": "query",
+                "name": "account_type",
+                "schema": {
+                    "items": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "type": "array"
+                }
+            },
+            "FilterAssignmentStatus": {
+                "description": "Filter the returned results by \"Status\"",
+                "example": [
+                    "CREATE_REQUESTED"
+                ],
+                "in": "query",
+                "name": "status",
+                "schema": {
+                    "items": {
+                        "$ref": "#/components/schemas/AssignmentRecordStatus"
+                    },
+                    "type": "array"
+                }
+            },
+            "FilterCreatedBy": {
+                "description": "Filter the returned results using the \"CreatedBy\" attribute",
+                "example": [
+                    "12345678-1234-1234-1234-123456789012",
+                    "87654321-4321-4321-4321-210987654321"
+                ],
+                "in": "query",
+                "name": "created_by",
+                "schema": {
+                    "items": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "type": "array"
+                }
+            },
+            "FilterGroupID": {
+                "description": "Filter the returned results using the \"GroupID\" attribute",
+                "example": [
+                    "12345678-1234-1234-1234-123456789012",
+                    "87654321-4321-4321-4321-210987654321"
+                ],
+                "in": "query",
+                "name": "group",
+                "schema": {
+                    "items": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "type": "array"
+                }
+            },
+            "FilterStatus": {
+                "description": "Filter the returned results by \"Status\"",
+                "example": [
+                    "ACTIVE"
+                ],
+                "in": "query",
+                "name": "status",
+                "schema": {
+                    "items": {
+                        "$ref": "#/components/schemas/PermissionSetStatus"
+                    },
+                    "type": "array"
+                }
+            },
+            "Limit": {
+                "description": "Pagination. The maxmimum number of records to return",
+                "in": "query",
+                "name": "limit",
+                "schema": {
+                    "default": 100,
+                    "format": "int64",
+                    "maximum": 100,
+                    "minimum": 1,
+                    "type": "integer"
+                }
+            },
+            "PageToken": {
+                "description": "Encoded pagination token used to fetch the page of data.",
+                "example": "ThlNjc5MjUwNDMzMAThlNjc5MjUwNDMzMA",
+                "in": "query",
+                "name": "page_token",
+                "schema": {
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "PermissionSetID": {
+                "description": "Permission Set ID",
+                "in": "path",
+                "name": "permission_set_id",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/ID"
+                }
+            }
+        },
+        "schemas": {
+            "AWSManagedPolicyRecord": {
+                "properties": {
+                    "Arn": {
+                        "type": "string"
+                    },
+                    "AttachmentCount": {
+                        "format": "int64",
+                        "type": "integer"
+                    },
+                    "CreateDate": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "DefaultVersionId": {
+                        "type": "string"
+                    },
+                    "IsAttachable": {
+                        "type": "boolean"
+                    },
+                    "Path": {
+                        "type": "string"
+                    },
+                    "PermissionsBoundaryUsageCount": {
+                        "format": "int64",
+                        "type": "integer"
+                    },
+                    "PolicyId": {
+                        "type": "string"
+                    },
+                    "PolicyName": {
+                        "type": "string"
+                    },
+                    "UpdateDate": {
+                        "format": "date-time",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "PolicyName"
+                ],
+                "type": "object"
+            },
+            "AssignmentRecord": {
+                "properties": {
+                    "AccountTypeId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "CreatedBy": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "CreatedTS": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "GroupId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "Id": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "ModifiedBy": {
+                        "description": "Stax User ID of the user that last modified the resource",
+                        "type": "string"
+                    },
+                    "ModifiedTS": {
+                        "description": "The timestamp of when the last modification was made",
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "PermissionSetId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "Status": {
+                        "$ref": "#/components/schemas/AssignmentRecordStatus"
+                    }
+                },
+                "required": [
+                    "Id",
+                    "PermissionSetId",
+                    "CreatedBy",
+                    "CreatedTS",
+                    "Status",
+                    "AccountTypeId",
+                    "GroupId"
+                ],
+                "type": "object"
+            },
+            "AssignmentRecordStatus": {
+                "enum": [
+                    "CREATE_REQUESTED",
+                    "UPDATE_REQUESTED",
+                    "DEPLOYMENT_IN_PROGRESS",
+                    "DEPLOYMENT_FAILED",
+                    "DEPLOYMENT_COMPLETE",
+                    "DELETE_REQUESTED",
+                    "DELETE_IN_PROGRESS",
+                    "DELETE_FAILED",
+                    "DELETE_COMPLETE"
+                ],
+                "type": "string"
+            },
+            "AssignmentRecords": {
+                "items": {
+                    "$ref": "#/components/schemas/AssignmentRecord"
+                },
+                "type": "array"
+            },
+            "CreateAssignmentsRequest": {
+                "description": "The assignments to create. Limited to 1 assignment",
+                "items": {
+                    "properties": {
+                        "AccountTypeId": {
+                            "$ref": "#/components/schemas/ID"
+                        },
+                        "GroupId": {
+                            "$ref": "#/components/schemas/ID"
+                        }
+                    },
+                    "required": [
+                        "AccountTypeId",
+                        "GroupId"
+                    ],
+                    "type": "object"
+                },
+                "maxItems": 1,
+                "minItems": 1,
+                "type": "array"
+            },
+            "CreatePermissionSetRecord": {
+                "properties": {
+                    "AWSManagedPolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetAWSManagedPolicy"
+                        },
+                        "maxItems": 10,
+                        "type": "array"
+                    },
+                    "Description": {
+                        "example": "Custom Permission Set",
+                        "maxLength": 1000,
+                        "pattern": "^[\\w\\s\\/+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "InlinePolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetInlinePolicy"
+                        },
+                        "maxItems": 10,
+                        "type": "array"
+                    },
+                    "MaxSessionDuration": {
+                        "default": 3600,
+                        "maximum": 43200,
+                        "minimum": 3600,
+                        "type": "integer"
+                    },
+                    "Name": {
+                        "description": "Name of the permission set. This will become the name of the role in an account, case sensitive. Prefixes 'stax' and 'idam' are not allowed.",
+                        "example": "myPermissionSetName",
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "pattern": "^[\\w+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "Tags": {
+                        "$ref": "#/components/schemas/Tags"
+                    }
+                },
+                "required": [
+                    "Name"
+                ],
+                "type": "object"
+            },
+            "Error": {
+                "properties": {
+                    "Code": {
+                        "description": "Error code",
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "Message": {
+                        "description": "Error message",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "Code",
+                    "Message"
+                ]
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "Error": {
+                        "$ref": "#/components/schemas/Error"
+                    }
+                },
+                "required": [
+                    "Error"
+                ]
+            },
+            "ID": {
+                "example": "12345678-1234-1234-1234-123456789012",
+                "format": "uuid",
+                "maxLength": 36,
+                "minLength": 36,
+                "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "type": "string"
+            },
+            "ListAWSManagedPolicies": {
+                "properties": {
+                    "AWSManagedPolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/AWSManagedPolicyRecord"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "AWSManagedPolicies"
+                ],
+                "type": "object"
+            },
+            "ListAssignmentRecords": {
+                "properties": {
+                    "Assignments": {
+                        "$ref": "#/components/schemas/AssignmentRecords"
+                    },
+                    "Paging": {
+                        "$ref": "#/components/schemas/Paging"
+                    }
+                },
+                "required": [
+                    "Assignments"
+                ],
+                "type": "object"
+            },
+            "ListPermissionSets": {
+                "properties": {
+                    "Paging": {
+                        "$ref": "#/components/schemas/Paging"
+                    },
+                    "PermissionSets": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetRecord"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "PermissionSets"
+                ],
+                "type": "object"
+            },
+            "ListRoles": {
+                "properties": {
+                    "Paging": {
+                        "$ref": "#/components/schemas/Paging"
+                    },
+                    "Roles": {
+                        "items": {
+                            "$ref": "#/components/schemas/RoleRecord"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "Roles"
+                ],
+                "type": "object"
+            },
+            "Paging": {
+                "properties": {
+                    "NextToken": {
+                        "description": "Pagination - The token value for requesting the next page to fetch.",
+                        "example": "ThlNjc5MjUwNDMzMAThlNjc5MjUwNDMzMA",
+                        "minLength": 1,
+                        "nullable": true,
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionSetAWSManagedPolicy": {
+                "properties": {
+                    "PolicyArn": {
+                        "example": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "PolicyArn"
+                ],
+                "type": "object"
+            },
+            "PermissionSetInlinePolicy": {
+                "properties": {
+                    "Name": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "pattern": "^[\\w+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "Policy": {
+                        "example": "{\"Version\":\"2012-10-17\",\"Statement\":{\"Effect\":\"Allow\",\"Action\":\"s3:*\",\"Resource\":\"*\"}}",
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "Name",
+                    "Policy"
+                ],
+                "type": "object"
+            },
+            "PermissionSetRecord": {
+                "properties": {
+                    "AWSManagedPolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetAWSManagedPolicy"
+                        },
+                        "maxItems": 10,
+                        "nullable": true,
+                        "type": "array"
+                    },
+                    "CreatedBy": {
+                        "description": "Stax User ID of the user that created the resource",
+                        "type": "string"
+                    },
+                    "CreatedTS": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "Description": {
+                        "example": "Custom Permission Set",
+                        "maxLength": 1000,
+                        "pattern": "^[\\w\\s\\/+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "Id": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "InlinePolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetInlinePolicy"
+                        },
+                        "maxItems": 10,
+                        "nullable": true,
+                        "type": "array"
+                    },
+                    "MaxSessionDuration": {
+                        "default": 3600,
+                        "maximum": 43200,
+                        "minimum": 3600,
+                        "type": "integer"
+                    },
+                    "ModifiedBy": {
+                        "description": "Stax User ID of the user that last modified the resource",
+                        "type": "string"
+                    },
+                    "ModifiedTS": {
+                        "description": "The timestamp of when the last modification was made",
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "Name": {
+                        "example": "myPermissionSetName",
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "pattern": "^[\\w+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "Status": {
+                        "$ref": "#/components/schemas/PermissionSetStatus"
+                    },
+                    "Tags": {
+                        "$ref": "#/components/schemas/Tags"
+                    }
+                },
+                "required": [
+                    "Id",
+                    "Name",
+                    "CreatedTS",
+                    "CreatedBy",
+                    "Status"
+                ],
+                "type": "object"
+            },
+            "PermissionSetStatus": {
+                "enum": [
+                    "ACTIVE",
+                    "DELETED"
+                ],
+                "type": "string"
+            },
+            "RoleRecord": {
+                "properties": {
+                    "AWSAccountId": {
+                        "type": "string"
+                    },
+                    "AssignmentId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "DeploymentId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "PermissionSetId": {
+                        "$ref": "#/components/schemas/ID"
+                    },
+                    "RoleArn": {
+                        "example": "arn:aws:iam::123456789012:role/staxid/myPermissionSetName",
+                        "type": "string"
+                    },
+                    "RoleName": {
+                        "example": "myPermissionSetName",
+                        "pattern": "^[\\w+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "Status": {
+                        "enum": [
+                            "ACTIVE",
+                            "UPDATE_IN_PROGRESS"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "PermissionSetId",
+                    "DeploymentId",
+                    "AssignmentId",
+                    "AWSAccountId",
+                    "RoleName",
+                    "RoleArn",
+                    "Status"
+                ],
+                "type": "object"
+            },
+            "Tags": {
+                "additionalProperties": {
+                    "type": "string"
+                },
+                "description": "Tags dictionary. Key must be \u003c= 100 characters. Value \u003c= 256. Pattern: ^[\\w\\s.:/=+-@]+$",
+                "example": {
+                    "CostCode": "12345"
+                },
+                "maxProperties": 45,
+                "type": "object"
+            },
+            "UpdatePermissionSetRecord": {
+                "properties": {
+                    "AWSManagedPolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetAWSManagedPolicy"
+                        },
+                        "maxItems": 10,
+                        "type": "array"
+                    },
+                    "Description": {
+                        "example": "Custom Permission Set",
+                        "maxLength": 1000,
+                        "pattern": "^[\\w\\s\\/+=,.@-]+$",
+                        "type": "string"
+                    },
+                    "InlinePolicies": {
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionSetInlinePolicy"
+                        },
+                        "maxItems": 10,
+                        "type": "array"
+                    },
+                    "MaxSessionDuration": {
+                        "default": 3600,
+                        "maximum": 43200,
+                        "minimum": 3600,
+                        "type": "integer"
+                    },
+                    "Tags": {
+                        "$ref": "#/components/schemas/Tags"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sigv4": {
+                "in": "header",
+                "name": "Authorization",
+                "type": "apiKey",
+                "x-amazon-apigateway-authtype": "awsSigv4"
+            }
+        }
+    },
+    "info": {
+        "contact": {
+            "url": "https://stax.io"
+        },
+        "description": "Implementation of Stax Permission Sets API",
+        "termsOfService": "https://www.stax.io/legal/terms/",
+        "title": "Stax Permission Sets API",
+        "version": "20210321"
+    },
+    "openapi": "3.0.2",
+    "paths": {
+        "/permission-sets": {
+            "get": {
+                "description": "Return list of permission sets",
+                "operationId": "ListPermissionSets",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Limit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageToken"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterStatus"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterCreatedBy"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListPermissionSets"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "List permission sets for an organisation",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            },
+            "post": {
+                "description": "Create permission set",
+                "operationId": "CreatePermissionSet",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreatePermissionSetRecord"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionSetRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request. Error creating resource. Check JSON request."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Conflict. Error creating permission set, the specified Name already exists."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error creating resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Create permission set",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/aws-managed-policies": {
+            "get": {
+                "description": "Returns a list of AWS managed policies.",
+                "operationId": "ListAWSManagedPolicies",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListAWSManagedPolicies"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "List AWS managed policies",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/roles": {
+            "get": {
+                "description": "Returns list of role assignments for an organisation. Optionally filter by a single account.",
+                "operationId": "ListRoles",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PageToken"
+                    },
+                    {
+                        "$ref": "#/components/parameters/AccountID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListRoles"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "List roles",
+                "tags": [
+                    "Roles"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/roles/me": {
+            "get": {
+                "description": "Returns list of role assignments for the user making the request. Only applies to Users (including federated users) and does not apply to Stax API Tokens. Optionally filter by a single account.",
+                "operationId": "ListMyRoles",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PageToken"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Limit"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListRoles"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden. When the requesting identity does not have access to the endpoint, for example when callled by a Stax API token."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "List my roles",
+                "tags": [
+                    "Roles"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/{permission_set_id}": {
+            "delete": {
+                "description": "Delete the specified permission set",
+                "operationId": "DeletePermissionSet",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionSetRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request. Error deleting resource. Check JSON request."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found. The specified resource was not found."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retriving the specified resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Delete permission set",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            },
+            "get": {
+                "description": "Return the specified permission set",
+                "operationId": "GetPermissionSet",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionSetRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found. The specified resource was not found."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retriving the specified resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Get permission set",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the specified permission set",
+                "operationId": "UpdatePermissionSet",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePermissionSetRecord"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionSetRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request. Error creating resource, check JSON request."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found. The specified resource was not found."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retriving the specified resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Update permission set",
+                "tags": [
+                    "PermissionSets"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/{permission_set_id}/assignments": {
+            "get": {
+                "description": "Return assignments for the specified permission set",
+                "operationId": "ListPermissionSetAssignments",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Limit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PageToken"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterAssignmentStatus"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterCreatedBy"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterGroupID"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterAccountTypeID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListAssignmentRecords"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retriving the specified resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Get assignments",
+                "tags": [
+                    "Assignments"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "cacheKeyParameters": [
+                        "method.request.path.permission_set_id"
+                    ],
+                    "cacheNamespace": "permission-sets.set",
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            },
+            "post": {
+                "description": "Create assignment for the specified permission set",
+                "operationId": "CreatePermissionSetAssignments",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAssignmentsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRecords"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request. Error creating resource. Check JSON request."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Create assignments",
+                "tags": [
+                    "Assignments"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/permission-sets/{permission_set_id}/assignments/{assignment_id}": {
+            "delete": {
+                "description": "Delete a specified assignment",
+                "operationId": "DeletePermissionSetAssignment",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    },
+                    {
+                        "$ref": "#/components/parameters/AssignmentID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Too Many Requests. When too many requests are made to the resource."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retriving the specified resource."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Delete assignment",
+                "tags": [
+                    "Assignments"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "cacheKeyParameters": [
+                        "method.request.path.permission_set_id"
+                    ],
+                    "cacheNamespace": "permission-sets.set",
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            },
+            "put": {
+                "description": "Redeploy the specified assignment",
+                "operationId": "RedeployPermissionSetAssignment",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PermissionSetID"
+                    },
+                    {
+                        "$ref": "#/components/parameters/AssignmentID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRecord"
+                                }
+                            }
+                        },
+                        "description": "Success."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found. The specified resource was not found."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error."
+                    }
+                },
+                "security": [
+                    {
+                        "sigv4": []
+                    }
+                ],
+                "summary": "Redeploy assignment",
+                "tags": [
+                    "Assignments"
+                ],
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        },
+        "/public/api-document": {
+            "get": {
+                "description": "Get the OpenAPI specification document for this API.",
+                "operationId": "GetAPIDocument",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error. Error retrieving resources."
+                    }
+                },
+                "summary": "Get the OpenAPI specification document for this API.",
+                "tags": [
+                    "Public"
+                ],
+                "x-amazon-apigateway-auth": {
+                    "type": "NONE"
+                },
+                "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "passthroughBehavior": "never",
+                    "type": "aws_proxy",
+                    "uri": {
+                        "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PublicAPILambda.Arn}:live/invocations"
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api.idam.au1.staxapp.cloud/20210321"
+        }
+    ]
+}

@@ -3,7 +3,7 @@ output: stax-server.gen.go
 generate:
   echo-server: true
 additional-imports:
-    - package: github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models
+    - package: github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models
       alias: .
 output-options:
   response-type-suffix: Resp

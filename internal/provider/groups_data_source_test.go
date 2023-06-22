@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/labstack/echo/v4"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/mocks"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/server"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/mocks"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/server"
 	"github.com/stretchr/testify/mock"
 )
 

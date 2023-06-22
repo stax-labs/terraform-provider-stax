@@ -13,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/client"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 

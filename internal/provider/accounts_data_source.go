@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
 

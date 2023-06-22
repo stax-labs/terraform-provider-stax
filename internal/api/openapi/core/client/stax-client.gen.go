@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
-	. "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	. "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 )
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function

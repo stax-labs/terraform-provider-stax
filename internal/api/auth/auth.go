@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/cognito"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/sts"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/client"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 )
 
 type CredentialsRetrieverFn func(ctx context.Context) (aws.Credentials, error)

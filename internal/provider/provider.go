@@ -20,7 +20,6 @@ import (
 )
 
 const (
-	endpointURLEnvVar  = "STAX_ENDPOINT_URL"
 	installationEnvVar = "STAX_INSTALLATION"
 	accessKeyEnvVar    = "STAX_ACCESS_KEY"
 	secretKeyEnvVar    = "STAX_SECRET_KEY"
@@ -39,10 +38,11 @@ type StaxProvider struct {
 
 // StaxProviderModel describes the provider data model.
 type StaxProviderModel struct {
-	Installation      types.String `tfsdk:"installation"`
-	EndpointURL       types.String `tfsdk:"endpoint_url"`
-	APITokenAccessKey types.String `tfsdk:"api_token_access_key"`
-	APITokenSecretKey types.String `tfsdk:"api_token_secret_key"`
+	Installation              types.String `tfsdk:"installation"`
+	EndpointURL               types.String `tfsdk:"endpoint_url"`
+	PermissionSetsEndpointURL types.String `tfsdk:"permission_sets_endpoint_url"`
+	APITokenAccessKey         types.String `tfsdk:"api_token_access_key"`
+	APITokenSecretKey         types.String `tfsdk:"api_token_secret_key"`
 }
 
 func (p *StaxProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -61,7 +61,11 @@ func (p *StaxProvider) Schema(ctx context.Context, req provider.SchemaRequest, r
 				},
 			},
 			"endpoint_url": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("Stax API endpoint for your Stax tenancy's control plane, this is used for testing and customers should use `installation`. Alternatively, can be configured using the `%s` environment variable. Must provide only one of `installation` or `endpoint_url`.", endpointURLEnvVar),
+				MarkdownDescription: "Stax API endpoint for your Stax tenancy's control plane, this is used for testing and customers should use `installation`. Must provide only one of `installation` or `endpoint_url`.",
+				Optional:            true,
+			},
+			"permission_sets_endpoint_url": schema.StringAttribute{
+				MarkdownDescription: "Stax Permission Sets API endpoint for your Stax tenancy's control plane, this is used for testing and customers should use `installation`. Must provide only one of `installation` or `endpoint_url`.",
 				Optional:            true,
 			},
 			"api_token_access_key": schema.StringAttribute{
@@ -99,7 +103,7 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 
 	if testEndpointURL := os.Getenv("INTEGRATION_TEST_ENDPOINT_URL"); testEndpointURL != "" {
-		client, err := staxsdk.NewClient(&auth.APIToken{}, staxsdk.WithEndpointURL(testEndpointURL), staxsdk.WithAuthRequestSigner(func(ctx context.Context, req *http.Request) error {
+		client, err := staxsdk.NewClient(&auth.APIToken{}, staxsdk.WithEndpointURL(testEndpointURL), staxsdk.WithPermissionSetsEndpointURL(testEndpointURL), staxsdk.WithAuthRequestSigner(func(ctx context.Context, req *http.Request) error {
 			return nil
 		}))
 		if err != nil {
@@ -125,8 +129,7 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	client, err := staxsdk.NewClient(
 		apiToken,
-		installationOpt,
-		staxsdk.WithUserAgentVersion(fmt.Sprintf("terraform-provider-stax/%s", p.version)),
+		append(installationOpt, staxsdk.WithUserAgentVersion(fmt.Sprintf("terraform-provider-stax/%s", p.version)))...,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create client, got error: %s", err))
@@ -156,27 +159,27 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewAccountsDataSource,
 		NewAccountTypesDataSource,
 		NewGroupsDataSource,
+		NewPermissionSetsDataSource,
 	}
 }
 
-func resolveEndpointConfiguration(data StaxProviderModel, resp *provider.ConfigureResponse) staxsdk.ClientOption {
+func resolveEndpointConfiguration(data StaxProviderModel, resp *provider.ConfigureResponse) []staxsdk.ClientOption {
 
 	// if an endpoint is configured use it
-	if !data.EndpointURL.IsNull() {
-		return staxsdk.WithEndpointURL(data.EndpointURL.ValueString())
+	if !data.EndpointURL.IsNull() && !data.PermissionSetsEndpointURL.IsNull() {
+		return []staxsdk.ClientOption{
+			staxsdk.WithEndpointURL(data.EndpointURL.ValueString()),
+			staxsdk.WithPermissionSetsEndpointURL(data.PermissionSetsEndpointURL.ValueString()),
+		}
 	}
 
 	// if an installation is configured use it
 	if !data.Installation.IsNull() {
-		return staxsdk.WithInstallation(data.Installation.ValueString())
-	}
-
-	if endpointURL := os.Getenv(endpointURLEnvVar); endpointURL != "" {
-		return staxsdk.WithEndpointURL(endpointURL)
+		return []staxsdk.ClientOption{staxsdk.WithInstallation(data.Installation.ValueString())}
 	}
 
 	if installation := os.Getenv(installationEnvVar); installation != "" {
-		return staxsdk.WithInstallation(installation)
+		return []staxsdk.ClientOption{staxsdk.WithInstallation(installation)}
 	}
 
 	resp.Diagnostics.AddAttributeError(
