@@ -45,7 +45,7 @@ The provider can also be configured using the equivalent environment variables a
 |---|---|---|
 | Account | ✅ | ✅ 
 | AccountType | ✅ | ✅
-| Permission Sets |
+| Permission Sets | | ✅
 | Policies |
 | APIToken |
 | User | 

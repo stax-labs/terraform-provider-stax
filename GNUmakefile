@@ -24,6 +24,11 @@ datasource-stax_account_types:
 datasource-stax_groups:
 	terraform -chdir=examples/data-sources/stax_groups plan -var="group_id=$(GROUP_ID)"
 
+# Run example stax_account_types datasource
+.PHONY: datasource-stax_permission_sets
+datasource-stax_permission_sets:
+	terraform -chdir=examples/data-sources/stax_permission_sets plan
+
 # Run example stax_account resource plan
 .PHONY: account-resource-plan
 account-resource-plan:
@@ -43,7 +48,6 @@ account-type-resource-plan:
 .PHONY: account-type-resource-apply
 account-type-resource-apply:
 	terraform -chdir=examples/resources/stax_account_type apply
-
 
 # Run example stax_group resource plan
 .PHONY: group-resource-plan

@@ -7,17 +7,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"runtime"
 	"runtime/debug"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/google/uuid"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/apigw"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/helpers"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/client"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
+	permissionssetsclient "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/client"
+	permissionssetsmodels "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/models"
 )
 
 const (
@@ -85,6 +89,10 @@ type ClientInterface interface {
 	GroupReadByID(ctx context.Context, groupID string) (*client.TeamsReadGroupResp, error)
 	//  GroupRead reads groups and returns a client.TeamsReadGroupsResp.
 	GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error)
+	//  PermissionSetsList lists permission sets and returns a permissionssetsclient.ListPermissionSetsResponse.
+	PermissionSetsList(ctx context.Context, params *permissionssetsmodels.ListPermissionSetsParams) (*permissionssetsclient.ListPermissionSetsResponse, error)
+	//  PermissionSetsReadByID reads a permission set by ID and returns a permissionssetsclient.GetPermissionSetResponse.
+	PermissionSetsReadByID(ctx context.Context, permissionSetId string) (*permissionssetsclient.GetPermissionSetResponse, error)
 	//	MonitorTask polls an asynchronous task and returns the final task response.
 	MonitorTask(ctx context.Context, taskID string, callbackFunc func(context.Context, *client.TasksReadTaskResp) bool) (*client.TasksReadTaskResp, error)
 }
@@ -101,6 +109,12 @@ type ClientOption func(*Client)
 func WithClient(client client.ClientWithResponsesInterface) ClientOption {
 	return func(c *Client) {
 		c.client = client
+	}
+}
+
+func WithPermissionSetsClient(client permissionssetsclient.ClientWithResponsesInterface) ClientOption {
+	return func(c *Client) {
+		c.permissionSetsClient = client
 	}
 }
 
@@ -138,6 +152,12 @@ func WithEndpointURL(endpointURL string) ClientOption {
 	}
 }
 
+func WithPermissionSetsEndpointURL(permissionSetsEndpointURL string) ClientOption {
+	return func(c *Client) {
+		c.permissionSetsEndpointURL = permissionSetsEndpointURL
+	}
+}
+
 func WithAuthRequestSigner(authRequestSigner client.RequestEditorFn) ClientOption {
 	return func(c *Client) {
 		c.authRequestSigner = authRequestSigner
@@ -147,14 +167,16 @@ func WithAuthRequestSigner(authRequestSigner client.RequestEditorFn) ClientOptio
 var _ ClientInterface = &Client{}
 
 type Client struct {
-	installation      string
-	endpointURL       string
-	userAgentVersion  string
-	httpClient        *http.Client
-	client            client.ClientWithResponsesInterface
-	apiToken          *auth.APIToken
-	authRequestSigner client.RequestEditorFn
-	authFn            AuthFn
+	installation              string
+	endpointURL               string
+	permissionSetsEndpointURL string
+	userAgentVersion          string
+	httpClient                *http.Client
+	client                    client.ClientWithResponsesInterface
+	permissionSetsClient      permissionssetsclient.ClientWithResponsesInterface
+	apiToken                  *auth.APIToken
+	authRequestSigner         func(ctx context.Context, req *http.Request) error
+	authFn                    AuthFn
 }
 
 //	NewClient creates a new STAX API client.
@@ -188,13 +210,23 @@ func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 		return nil, ErrMissingAPIToken
 	}
 
-	url, err := getInstallationURL(c.installation, c.endpointURL)
+	installationURLs, err := getInstallationURL(c.installation, installationURLs{
+		CoreAPIEndpointURL:        c.endpointURL,
+		PermissionSetsEndpointURL: c.permissionSetsEndpointURL,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	if c.client == nil {
-		c.client, err = client.NewClientWithResponses(url, client.WithHTTPClient(c.httpClient), buildUserAgentRequestEditor(c.userAgentVersion))
+		c.client, err = client.NewClientWithResponses(installationURLs.CoreAPIEndpointURL, client.WithHTTPClient(c.httpClient), client.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if c.permissionSetsClient == nil {
+		c.permissionSetsClient, err = permissionssetsclient.NewClientWithResponses(installationURLs.PermissionSetsEndpointURL, permissionssetsclient.WithHTTPClient(c.httpClient), permissionssetsclient.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
 		if err != nil {
 			return nil, err
 		}
@@ -706,6 +738,40 @@ func (cl *Client) UserCreate(ctx context.Context, params models.TeamsCreateUser)
 	return createUserResp, nil
 }
 
+func (cl *Client) PermissionSetsReadByID(ctx context.Context, permissionSetId string) (*permissionssetsclient.GetPermissionSetResponse, error) {
+
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	readResp, err := cl.permissionSetsClient.GetPermissionSetWithResponse(ctx, psetId, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, readResp, string(readResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return readResp, nil
+}
+
+func (cl *Client) PermissionSetsList(ctx context.Context, params *permissionssetsmodels.ListPermissionSetsParams) (*permissionssetsclient.ListPermissionSetsResponse, error) {
+	listResp, err := cl.permissionSetsClient.ListPermissionSetsWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, listResp, string(listResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return listResp, nil
+}
+
 //	MonitorTask polls an asynchronous task and returns the final task response.
 //
 // It uses a TaskPoller to poll the TasksReadTask API endpoint for the status of the task.
@@ -774,28 +840,42 @@ func checkResponse(_ context.Context, res helpers.HTTPResponse, _ string) error 
 	return nil
 }
 
-func getInstallationURL(installation, endpointURL string) (string, error) {
-	if endpointURL != "" {
-		return endpointURL, nil
+type installationURLs struct {
+	CoreAPIEndpointURL        string
+	PermissionSetsEndpointURL string
+}
+
+func getInstallationURL(installation string, overrideEndpointURLs installationURLs) (*installationURLs, error) {
+	if !reflect.ValueOf(overrideEndpointURLs).IsZero() {
+		return &overrideEndpointURLs, nil
 	}
 
 	switch installation {
 	case "au1":
-		return "https://api.au1.staxapp.cloud", nil
+		return &installationURLs{
+			CoreAPIEndpointURL:        "https://api.au1.staxapp.cloud",
+			PermissionSetsEndpointURL: "https://api.idam.au1.staxapp.cloud/20210321",
+		}, nil
 	case "us1":
-		return "https://api.us1.staxapp.cloud", nil
+		return &installationURLs{
+			CoreAPIEndpointURL:        "https://api.us1.staxapp.cloud",
+			PermissionSetsEndpointURL: "https://api.idam.us1.staxapp.cloud/20210321",
+		}, nil
 	case "eu1":
-		return "https://api.eu1.staxapp.cloud", nil
+		return &installationURLs{
+			CoreAPIEndpointURL:        "https://api.eu1.staxapp.cloud",
+			PermissionSetsEndpointURL: "https://api.idam.eu1.staxapp.cloud/20210321",
+		}, nil
 	}
 
-	return "", ErrInvalidInstallation
+	return nil, ErrInvalidInstallation
 }
 
-func buildUserAgentRequestEditor(tag string) client.ClientOption {
-	return client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+func buildUserAgentRequestEditor(tag string) func(ctx context.Context, req *http.Request) error {
+	return func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("User-Agent", buildUserAgentVersion(tag))
 		return nil
-	})
+	}
 }
 
 // buildUserAgentVersion build user agent

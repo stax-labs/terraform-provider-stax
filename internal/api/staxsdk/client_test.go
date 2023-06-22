@@ -9,9 +9,9 @@ import (
 	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/cognito"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/mocks"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/client"
-	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/mocks"
+	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -290,4 +290,65 @@ func testAuthFn(ctx context.Context, client client.ClientWithResponsesInterface,
 			RefreshToken: aws.String("test"),
 		},
 	}, nil
+}
+
+func TestGetInstallationCoreAPIURL(t *testing.T) {
+	tests := []struct {
+		name                 string
+		installation         string
+		overrideEndpointURLs installationURLs
+		want                 *installationURLs
+		wantErr              bool
+	}{
+		{
+			name:         "Valid AU1 installation",
+			installation: "au1",
+			want: &installationURLs{
+				CoreAPIEndpointURL:        "https://api.au1.staxapp.cloud",
+				PermissionSetsEndpointURL: "https://api.idam.au1.staxapp.cloud/20210321",
+			},
+			wantErr: false,
+		},
+		{
+			name:         "Valid US1 installation",
+			installation: "us1",
+			want: &installationURLs{
+				CoreAPIEndpointURL:        "https://api.us1.staxapp.cloud",
+				PermissionSetsEndpointURL: "https://api.idam.us1.staxapp.cloud/20210321",
+			},
+			wantErr: false,
+		},
+		{
+			name:         "Valid EU1 installation",
+			installation: "eu1",
+			want: &installationURLs{
+				CoreAPIEndpointURL:        "https://api.eu1.staxapp.cloud",
+				PermissionSetsEndpointURL: "https://api.idam.eu1.staxapp.cloud/20210321",
+			},
+			wantErr: false,
+		},
+		{
+			name:         "Invalid installation",
+			installation: "invalid",
+			want:         nil,
+			wantErr:      true,
+		},
+		{
+			name:                 "Endpoint URL configured",
+			overrideEndpointURLs: installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://example.com"},
+			want:                 &installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://example.com"},
+			wantErr:              false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := require.New(t)
+			got, err := getInstallationURL(tt.installation, tt.overrideEndpointURLs)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getInstallationURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(tt.want, got)
+		})
+	}
 }

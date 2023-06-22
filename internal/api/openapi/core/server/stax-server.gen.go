@@ -9,7 +9,7 @@ import (
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/labstack/echo/v4"
-	. "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/models"
+	. "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 )
 
 // ServerInterface represents all server handlers.
