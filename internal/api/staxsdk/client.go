@@ -93,6 +93,12 @@ type ClientInterface interface {
 	PermissionSetsList(ctx context.Context, params *permissionssetsmodels.ListPermissionSetsParams) (*permissionssetsclient.ListPermissionSetsResponse, error)
 	//  PermissionSetsReadByID reads a permission set by ID and returns a permissionssetsclient.GetPermissionSetResponse.
 	PermissionSetsReadByID(ctx context.Context, permissionSetId string) (*permissionssetsclient.GetPermissionSetResponse, error)
+	//  PermissionSetsCreate creates a permission set and returns a permissionssetsclient.CreatePermissionSetResponse.
+	PermissionSetsCreate(ctx context.Context, params permissionssetsmodels.CreatePermissionSetRecord) (*permissionssetsclient.CreatePermissionSetResponse, error)
+	//  PermissionSetsUpdate updates a permission set and returns a permissionssetsclient.UpdatePermissionSetResponse.
+	PermissionSetsUpdate(ctx context.Context, permissionSetId string, params permissionssetsmodels.UpdatePermissionSetRecord) (*permissionssetsclient.UpdatePermissionSetResponse, error)
+	//  PermissionSetsDelete deletes a permission set and returns a permissionssetsclient.DeletePermissionSetResponse.
+	PermissionSetsDelete(ctx context.Context, permissionSetId string) (*permissionssetsclient.DeletePermissionSetResponse, error)
 	//	MonitorTask polls an asynchronous task and returns the final task response.
 	MonitorTask(ctx context.Context, taskID string, callbackFunc func(context.Context, *client.TasksReadTaskResp) bool) (*client.TasksReadTaskResp, error)
 }
@@ -770,6 +776,58 @@ func (cl *Client) PermissionSetsList(ctx context.Context, params *permissionsset
 	}
 
 	return listResp, nil
+}
+
+func (cl *Client) PermissionSetsCreate(ctx context.Context, params permissionssetsmodels.CreatePermissionSetRecord) (*permissionssetsclient.CreatePermissionSetResponse, error) {
+	createResp, err := cl.permissionSetsClient.CreatePermissionSetWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if createResp.StatusCode() != http.StatusCreated {
+		// TODO: split out each of the error types by status code
+		return nil, fmt.Errorf("request failed, returned non 201 status: %s", createResp.Status())
+	}
+
+	return createResp, nil
+}
+
+func (cl *Client) PermissionSetsUpdate(ctx context.Context, permissionSetId string, params permissionssetsmodels.UpdatePermissionSetRecord) (*permissionssetsclient.UpdatePermissionSetResponse, error) {
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	updateResp, err := cl.permissionSetsClient.UpdatePermissionSetWithResponse(ctx, psetId, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if updateResp.StatusCode() != http.StatusOK {
+		// TODO: split out each of the error types by status code
+		return nil, fmt.Errorf("request failed, returned non 200 status: %s", updateResp.Status())
+	}
+
+	return updateResp, nil
+}
+
+func (cl *Client) PermissionSetsDelete(ctx context.Context, permissionSetId string) (*permissionssetsclient.DeletePermissionSetResponse, error) {
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	deleteResp, err := cl.permissionSetsClient.DeletePermissionSetWithResponse(ctx, psetId, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if deleteResp.StatusCode() != http.StatusOK {
+		// TODO: split out each of the error types by status code
+		return nil, fmt.Errorf("request failed, returned non 200 status: %s", deleteResp.Status())
+	}
+
+	return deleteResp, nil
 }
 
 //	MonitorTask polls an asynchronous task and returns the final task response.
