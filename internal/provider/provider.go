@@ -158,6 +158,7 @@ func (p *StaxProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewGroupMembershipResource,
 		NewPermissionSetResource,
 		NewPermissionSetAssignmentResource,
+		NewWorkloadResource,
 	}
 }
 
@@ -169,6 +170,7 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewUsersDataSource,
 		NewPermissionSetsDataSource,
 		NewPermissionSetAssignmentsDataSource,
+		NewWorkloadsDataSource,
 	}
 }
 

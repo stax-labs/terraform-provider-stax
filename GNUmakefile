@@ -39,6 +39,11 @@ datasource-stax_permission_sets:
 datasource-stax_permission_set_assignments:
 	terraform -chdir=examples/data-sources/stax_permission_set_assignments plan -var="permission_set_id=$(PERMISSION_SET_ID)"
 
+# Run example stax_workloads datasource
+.PHONY: datasource-stax_workloads
+datasource-stax_workloads:
+	terraform -chdir=examples/data-sources/stax_workloads plan -var="workload_id=$(WORKLOAD_ID)"
+
 # Run example stax_account resource plan
 .PHONY: account-resource-plan
 account-resource-plan:
@@ -108,3 +113,9 @@ stax_permission_set-resource-import:
 stax_permission_set_assignment-resource-import:
 	rm -rf examples/resources/stax_permission_set_assignment/*.tfstate
 	cd examples/resources/stax_permission_set_assignment && terraform import -var="group_id=$(PSA_GROUP_ID)"  -var="account_type_id=$(PSA_ACCOUNT_TYPE_ID)" -var="permission_set_id=$(PS_ID)" stax_permission_set_assignment.data-scientist-production $(PS_ID):$(IMPORT_PSA_ID)
+
+# Run example stax_workload import
+.PHONY: workload-resource-import
+workload-resource-import:
+	rm -rf examples/resources/stax_workload/*.tfstate
+	cd examples/resources/stax_workload && terraform import -var="account_id=$(ACCOUNT_ID)" -var="catalog_id=$(WORKLOAD_CATALOG_ID)" -var="region=$(REGION)" stax_workload.shared-workloads-bucket $(IMPORT_STAX_WORKLOAD_ID)

@@ -77,6 +77,14 @@ type ClientInterface interface {
 	AccountTypeReadById(ctx context.Context, accountTypeID string) (*client.AccountsReadAccountTypeResp, error)
 	// AccountTypeRead reads account types and returns a client.AccountsReadAccountTypesResp.
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
+	// WorkloadCreate creates a workload and returns a client.WorkloadsCreateWorkloadResp.
+	WorkloadCreate(ctx context.Context, createWorkload models.WorkloadsCreateWorkload) (*client.WorkloadsCreateWorkloadResp, error)
+	// WorkloadReadByID reads workload by id and returns a client.WorkloadsReadWorkloadResp.
+	WorkloadReadByID(ctx context.Context, workloadID string) (*client.WorkloadsReadWorkloadResp, error)
+	// WorkloadRead reads workloads and returns a client.WorkloadsReadWorkloadsResp.
+	WorkloadRead(ctx context.Context, params *models.WorkloadsReadWorkloadsParams) (*client.WorkloadsReadWorkloadsResp, error)
+	// WorkloadUpdate updates a workload and returns a client.WorkloadsUpdateWorkloadResp.
+	WorkloadUpdate(ctx context.Context, workloadID string, params models.WorkloadsUpdateWorkload) (*client.WorkloadsUpdateWorkloadResp, error)
 	// WorkloadDelete deletes a workload and returns a client.WorkloadsDeleteWorkloadResp.
 	WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error)
 	UserReadByID(ctx context.Context, userID string) (*client.TeamsReadUserResp, error)
@@ -604,6 +612,28 @@ func (cl *Client) WorkloadCreate(ctx context.Context, createWorkload models.Work
 	return workloadCreateResp, nil
 }
 
+//	WorkloadReadByID reads a single workload by ID from STAX.
+//
+// ctx: The context to use for this request.
+// workloadID: The ID of the workload to read.
+//
+// Returns:
+// - workloadsReadResp: The response from the WorkloadsReadWorkload API call.
+// - err: Any error that occurred.
+func (cl *Client) WorkloadReadByID(ctx context.Context, workloadID string) (*client.WorkloadsReadWorkloadResp, error) {
+	workloadsReadResp, err := cl.client.WorkloadsReadWorkloadWithResponse(ctx, workloadID, &models.WorkloadsReadWorkloadParams{}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsReadResp, string(workloadsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsReadResp, nil
+}
+
 //	WorkloadRead reads workloads from STAX.
 //
 // ctx: The context to use for this request.
@@ -624,6 +654,29 @@ func (cl *Client) WorkloadRead(ctx context.Context, params *models.WorkloadsRead
 	}
 
 	return workloadsReadResp, nil
+}
+
+//	WorkloadUpdate updates a workload in STAX.
+//
+// ctx: The context to use for this request.
+// workloadID: The ID of the workload to update.
+// params: The parameters to update the workload with.
+//
+// Returns:
+// - workloadUpdateResp: The response from the WorkloadsUpdateWorkload API call.
+// - err: Any error that occurred.
+func (cl *Client) WorkloadUpdate(ctx context.Context, workloadID string, params models.WorkloadsUpdateWorkload) (*client.WorkloadsUpdateWorkloadResp, error) {
+	workloadUpdateResp, err := cl.client.WorkloadsUpdateWorkloadWithResponse(ctx, workloadID, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadUpdateResp, string(workloadUpdateResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadUpdateResp, nil
 }
 
 //	WorkloadDelete deletes a workload in STAX.
