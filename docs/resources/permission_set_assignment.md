@@ -3,26 +3,26 @@
 page_title: "stax_permission_set_assignment Resource - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Stax Permission Set Assignment resource
+  Provides a Stax Permission Set Assignment resource. This provides a mapping which links Stax Permission Sets https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets, Stax Groups and Stax Account types.
 ---
 
 # stax_permission_set_assignment (Resource)
 
-Stax Permission Set Assignment resource
+Provides a Stax Permission Set Assignment resource. This provides a mapping which links [Stax Permission Sets](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets), Stax Groups and Stax Account types.
 
 ## Example Usage
 
 ```terraform
 variable "permission_set_id" {
-  description = "the permission set identifier used for these assignments"
+  description = "the permission set identifier used for this assignment"
 }
 
 variable "group_id" {
-  description = "the group identifier used for these assignment"
+  description = "the group identifier used for this assignment"
 }
 
 variable "account_type_id" {
-  description = "the account type identifier used for these assignment"
+  description = "the account type identifier used for this assignment"
 }
 
 resource "stax_permission_set_assignment" "data-scientist-production" {
