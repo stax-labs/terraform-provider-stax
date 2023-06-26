@@ -3,12 +3,12 @@
 page_title: "stax_permission_set Resource - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Stax Permission Set resource
+  Provides a Stax Permission Set resource. Permission Sets https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets allow customers to define their own AWS Access permissions, to which AWS accounts they apply and the groups of users who are subsequently granted access.
 ---
 
 # stax_permission_set (Resource)
 
-Stax Permission Set resource
+Provides a Stax Permission Set resource. [Permission Sets](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets) allow customers to define their own AWS Access permissions, to which AWS accounts they apply and the groups of users who are subsequently granted access.
 
 ## Example Usage
 
@@ -36,10 +36,10 @@ resource "stax_permission_set" "data-scientist" {
 
 ### Optional
 
-- `aws_managed_policy_arns` (List of String) A list of aws managed policy arns assigned to the Permission Set
+- `aws_managed_policy_arns` (List of String) A list of aws managed policy arns assigned to the Permission Set, see [aws managed policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies) documentation for more information
 - `description` (String) The description of the stax Permission Set
 - `inline_policies` (Set of Object) The inline policies assigned to the Permission Set (see [below for nested schema](#nestedatt--inline_policies))
-- `max_session_duration` (Number) The max session duration used by this Permission Set
+- `max_session_duration` (Number) The max session duration in seconds, used by this Permission Set when creating the AWS IAM role
 - `tags` (Map of String) Permission Set tags
 
 ### Read-Only

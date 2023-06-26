@@ -3,8 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/models"
@@ -61,7 +66,7 @@ func (r *PermissionSetResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *PermissionSetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stax Permission Set resource",
+		MarkdownDescription: "Provides a Stax Permission Set resource. [Permission Sets](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets) allow customers to define their own AWS Access permissions, to which AWS accounts they apply and the groups of users who are subsequently granted access.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -92,8 +97,11 @@ func (r *PermissionSetResource) Schema(ctx context.Context, req resource.SchemaR
 				Computed:            true,
 			},
 			"max_session_duration": schema.Int64Attribute{
-				MarkdownDescription: "The max session duration used by this Permission Set",
+				MarkdownDescription: "The max session duration in seconds, used by this Permission Set when creating the AWS IAM role",
 				Optional:            true,
+				Validators: []validator.Int64{
+					int64validator.Between(3600, 43200),
+				},
 			},
 			"tags": schema.MapAttribute{
 				MarkdownDescription: "Permission Set tags",
@@ -106,11 +114,17 @@ func (r *PermissionSetResource) Schema(ctx context.Context, req resource.SchemaR
 				Optional:            true,
 			},
 			"aws_managed_policy_arns": schema.ListAttribute{
-				MarkdownDescription: "A list of aws managed policy arns assigned to the Permission Set",
+				MarkdownDescription: "A list of aws managed policy arns assigned to the Permission Set, see [aws managed policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies) documentation for more information",
 				Optional:            true,
 				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`^arn:aws:iam::aws:policy\/.*$`),
+						"must be in ARN format and be prefixed with arn:aws:iam::aws:policy/",
+					)),
+				},
 			},
-		},
+		}, // arn:aws:iam::aws:policy\/.*
 	}
 }
 
@@ -156,12 +170,19 @@ func (r *PermissionSetResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	staxTags := make(map[string]string)
+	resp.Diagnostics.Append(data.Tags.ElementsAs(ctx, &staxTags, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	params := models.CreatePermissionSetRecord{
 		Name:               data.Name.ValueString(),
 		Description:        data.Description.ValueStringPointer(),
 		MaxSessionDuration: convertToIPtr(data.MaxSessionDuration.ValueInt64Pointer()),
 		InlinePolicies:     inlinePolicies,
 		AWSManagedPolicies: awsManagedPolicyArns,
+		Tags:               (*models.Tags)(&staxTags),
 	}
 
 	created, err := r.client.PermissionSetsCreate(ctx, params)
@@ -220,11 +241,18 @@ func (r *PermissionSetResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	staxTags := make(map[string]string)
+	resp.Diagnostics.Append(data.Tags.ElementsAs(ctx, &staxTags, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	params := models.UpdatePermissionSetRecord{
 		InlinePolicies:     inlinePolicies,
 		Description:        data.Description.ValueStringPointer(),
 		MaxSessionDuration: convertToIPtr(data.MaxSessionDuration.ValueInt64Pointer()),
 		AWSManagedPolicies: awsManagedPolicyArns,
+		Tags:               (*models.Tags)(&staxTags),
 	}
 
 	updated, err := r.client.PermissionSetsUpdate(ctx, data.ID.ValueString(), params)

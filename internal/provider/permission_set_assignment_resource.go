@@ -50,7 +50,7 @@ func (r *PermissionSetAssignmentResource) Metadata(ctx context.Context, req reso
 
 func (r *PermissionSetAssignmentResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stax Permission Set Assignment resource",
+		MarkdownDescription: "Provides a Stax Permission Set Assignment resource. This provides a mapping which links [Stax Permission Sets](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets), Stax Groups and Stax Account types.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
