@@ -151,10 +151,12 @@ func Auth(ctx context.Context, opts ...AuthOption) (*AuthResult, error) {
 	}
 
 	if cfg.csrp == nil {
-		cfg.csrp, err = cognitosrp.NewCognitoSRP(cfg.username, cfg.password, cfg.userPoolID, cfg.userPoolWebClientID, nil)
+		csrp, err := cognitosrp.NewCognitoSRP(cfg.username, cfg.password, cfg.userPoolID, cfg.userPoolWebClientID, nil)
 		if err != nil {
 			return nil, err
 		}
+
+		cfg.csrp = csrp
 	}
 
 	resp, err := cfg.cipsvc.InitiateAuth(ctx, &cognitoidentityprovider.InitiateAuthInput{
