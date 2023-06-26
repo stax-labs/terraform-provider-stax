@@ -11,11 +11,10 @@ import (
 
 func TestTaskPoller(t *testing.T) {
 	t.Run("polls successfully", func(t *testing.T) {
-		taskID := "task-id"
 		taskFunc := func() (HTTPResponse, error) {
 			return &mockHTTPResponse{statusCode: http.StatusOK}, nil
 		}
-		tp := NewTaskPoller(taskID, taskFunc)
+		tp := NewTaskPoller(taskFunc)
 
 		shouldContinue := tp.Poll(context.Background())
 		assert.True(t, shouldContinue)
@@ -24,11 +23,10 @@ func TestTaskPoller(t *testing.T) {
 	})
 
 	t.Run("stops polling on error", func(t *testing.T) {
-		taskID := "task-id"
 		taskFunc := func() (HTTPResponse, error) {
 			return nil, fmt.Errorf("error")
 		}
-		tp := NewTaskPoller(taskID, taskFunc)
+		tp := NewTaskPoller(taskFunc)
 
 		shouldContinue := tp.Poll(context.Background())
 		assert.False(t, shouldContinue)
@@ -37,11 +35,10 @@ func TestTaskPoller(t *testing.T) {
 	})
 
 	t.Run("stops polling on non-200 response", func(t *testing.T) {
-		taskID := "task-id"
 		taskFunc := func() (HTTPResponse, error) {
 			return &mockHTTPResponse{statusCode: http.StatusBadRequest}, nil
 		}
-		tp := NewTaskPoller(taskID, taskFunc)
+		tp := NewTaskPoller(taskFunc)
 
 		shouldContinue := tp.Poll(context.Background())
 		assert.False(t, shouldContinue)

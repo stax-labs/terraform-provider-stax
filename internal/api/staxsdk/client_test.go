@@ -7,11 +7,15 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
+	"github.com/google/uuid"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/cognito"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/mocks"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
+	permissionssetsclient "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/client"
+	permissionssetsmocks "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/mocks"
+	permissionssetsmodels "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -265,6 +269,137 @@ func TestClient_UserCreate(t *testing.T) {
 	assert.Equal(&models.TeamsCreateUserEvent{TaskId: &taskId}, userResp.JSON200)
 }
 
+func TestClient_PermissionSetsReadByID(t *testing.T) {
+	assert := require.New(t)
+	permissionSetID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestPermissionSetsClient(t)
+
+	permissionSetRecord := &permissionssetsmodels.PermissionSetRecord{
+		Id: uuid.MustParse(permissionSetID),
+	}
+
+	clientWithResponsesMock.On("GetPermissionSetWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		uuid.MustParse(permissionSetID),
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&permissionssetsclient.GetPermissionSetResponse{
+		JSON200:      permissionSetRecord,
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	permissionSetResp, err := testClient.PermissionSetsReadByID(context.TODO(), permissionSetID)
+	assert.NoError(err)
+	assert.Equal(permissionSetRecord, permissionSetResp.JSON200)
+}
+
+func TestClient_PermissionSetsList(t *testing.T) {
+	assert := require.New(t)
+	permissionSetID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestPermissionSetsClient(t)
+
+	params := &permissionssetsmodels.ListPermissionSetsParams{}
+
+	permissionSetRecord := permissionssetsmodels.PermissionSetRecord{
+		Id: uuid.MustParse(permissionSetID),
+	}
+
+	clientWithResponsesMock.On("ListPermissionSetsWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		params,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&permissionssetsclient.ListPermissionSetsResponse{
+		JSON200: &permissionssetsmodels.ListPermissionSets{
+			PermissionSets: []permissionssetsmodels.PermissionSetRecord{
+				permissionSetRecord,
+			},
+		},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	permissionSetResp, err := testClient.PermissionSetsList(context.TODO(), params)
+	assert.NoError(err)
+	assert.Equal(&permissionssetsmodels.ListPermissionSets{PermissionSets: []permissionssetsmodels.PermissionSetRecord{permissionSetRecord}}, permissionSetResp.JSON200)
+}
+
+func TestClient_PermissionSetsCreate(t *testing.T) {
+	assert := require.New(t)
+	permissionSetID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestPermissionSetsClient(t)
+
+	params := permissionssetsmodels.CreatePermissionSetRecord{}
+
+	permissionSetRecord := &permissionssetsmodels.PermissionSetRecord{
+		Id: uuid.MustParse(permissionSetID),
+	}
+
+	clientWithResponsesMock.On("CreatePermissionSetWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		params,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&permissionssetsclient.CreatePermissionSetResponse{
+		JSON201:      permissionSetRecord,
+		HTTPResponse: &http.Response{StatusCode: http.StatusCreated},
+	}, nil)
+
+	permissionSetResp, err := testClient.PermissionSetsCreate(context.TODO(), params)
+	assert.NoError(err)
+	assert.Equal(permissionSetRecord, permissionSetResp.JSON201)
+}
+
+func TestClient_PermissionSetsUpdate(t *testing.T) {
+	assert := require.New(t)
+	permissionSetID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestPermissionSetsClient(t)
+
+	params := permissionssetsmodels.UpdatePermissionSetRecord{}
+
+	permissionSetRecord := &permissionssetsmodels.PermissionSetRecord{
+		Id: uuid.MustParse(permissionSetID),
+	}
+
+	clientWithResponsesMock.On("UpdatePermissionSetWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		uuid.MustParse(permissionSetID),
+		params,
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&permissionssetsclient.UpdatePermissionSetResponse{
+		JSON200:      permissionSetRecord,
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	permissionSetResp, err := testClient.PermissionSetsUpdate(context.TODO(), permissionSetID, params)
+	assert.NoError(err)
+	assert.Equal(permissionSetRecord, permissionSetResp.JSON200)
+}
+
+func TestClient_PermissionSetsDelete(t *testing.T) {
+	assert := require.New(t)
+	permissionSetID := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	testClient, clientWithResponsesMock := NewTestPermissionSetsClient(t)
+
+	permissionSetRecord := &permissionssetsmodels.PermissionSetRecord{
+		Id: uuid.MustParse(permissionSetID),
+	}
+
+	clientWithResponsesMock.On("DeletePermissionSetWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		uuid.MustParse(permissionSetID),
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&permissionssetsclient.DeletePermissionSetResponse{
+		JSON200:      permissionSetRecord,
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	permissionSetResp, err := testClient.PermissionSetsDelete(context.TODO(), permissionSetID)
+	assert.NoError(err)
+	assert.Equal(permissionSetRecord, permissionSetResp.JSON200)
+}
+
 func NewTestClient(t *testing.T) (*Client, *mocks.ClientWithResponsesInterface) {
 
 	clientWithResponses := mocks.NewClientWithResponsesInterface(t)
@@ -272,6 +407,23 @@ func NewTestClient(t *testing.T) (*Client, *mocks.ClientWithResponsesInterface) 
 	c := Client{
 		client: clientWithResponses,
 		authFn: testAuthFn,
+	}
+
+	err := c.Authenticate(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return &c, clientWithResponses
+}
+
+func NewTestPermissionSetsClient(t *testing.T) (*Client, *permissionssetsmocks.ClientWithResponsesInterface) {
+
+	clientWithResponses := permissionssetsmocks.NewClientWithResponsesInterface(t)
+
+	c := Client{
+		permissionSetsClient: clientWithResponses,
+		authFn:               testAuthFn,
 	}
 
 	err := c.Authenticate(context.Background())

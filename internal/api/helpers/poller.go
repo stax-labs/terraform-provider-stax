@@ -16,18 +16,16 @@ type HTTPResponse interface {
 // It will call the provided taskFunc to get the latest task status and will continue polling until
 // the task completes (succeeds or fails) or an error occurs.
 type TaskPoller[T HTTPResponse] struct {
-	taskID   string
 	taskFunc func() (T, error)
 	lastResp T
 	err      error // Sticky error.
 }
 
 // NewTaskPoller creates a new TaskPoller.
-// taskID is the ID of the asynchronous task to poll.
 // taskFunc is a function that will be called to get the latest status of the task. It should return
 // a HTTPResponse and an error.
-func NewTaskPoller[T HTTPResponse](taskID string, taskFunc func() (T, error)) *TaskPoller[T] {
-	return &TaskPoller[T]{taskID: taskID, taskFunc: taskFunc}
+func NewTaskPoller[T HTTPResponse](taskFunc func() (T, error)) *TaskPoller[T] {
+	return &TaskPoller[T]{taskFunc: taskFunc}
 }
 
 // Err returns the first error encountered while polling.

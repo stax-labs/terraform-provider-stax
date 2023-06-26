@@ -22,6 +22,7 @@ import (
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	permissionssetsclient "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/client"
 	permissionssetsmodels "github.com/stax-labs/terraform-provider-stax/internal/api/openapi/permissionssets/models"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -99,8 +100,13 @@ type ClientInterface interface {
 	PermissionSetsUpdate(ctx context.Context, permissionSetId string, params permissionssetsmodels.UpdatePermissionSetRecord) (*permissionssetsclient.UpdatePermissionSetResponse, error)
 	//  PermissionSetsDelete deletes a permission set and returns a permissionssetsclient.DeletePermissionSetResponse.
 	PermissionSetsDelete(ctx context.Context, permissionSetId string) (*permissionssetsclient.DeletePermissionSetResponse, error)
+	PermissionSetAssignmentCreate(ctx context.Context, permissionSetId string, params permissionssetsmodels.CreateAssignmentsRequest) (*permissionssetsclient.CreatePermissionSetAssignmentsResponse, error)
+	PermissionSetAssignmentList(ctx context.Context, permissionSetId string, params *permissionssetsmodels.ListPermissionSetAssignmentsParams) (*permissionssetsclient.ListPermissionSetAssignmentsResponse, error)
+	PermissionSetAssignmentDelete(ctx context.Context, permissionSetId string, assignmentId string) (*permissionssetsclient.DeletePermissionSetAssignmentResponse, error)
 	//	MonitorTask polls an asynchronous task and returns the final task response.
 	MonitorTask(ctx context.Context, taskID string, callbackFunc func(context.Context, *client.TasksReadTaskResp) bool) (*client.TasksReadTaskResp, error)
+	//	MonitorPermissionSetAssignments polls an asynchronous assignment update and returns the final response.
+	MonitorPermissionSetAssignments(ctx context.Context, permissionSetID, assignmentID string, completionStatuses []permissionssetsmodels.AssignmentRecordStatus, params *permissionssetsmodels.ListPermissionSetAssignmentsParams, callbackFunc func(context.Context, *permissionssetsclient.ListPermissionSetAssignmentsResponse) bool) (*permissionssetsclient.ListPermissionSetAssignmentsResponse, error)
 }
 
 //	AuthFn is the authentication function used to authenticate a client.
@@ -830,6 +836,70 @@ func (cl *Client) PermissionSetsDelete(ctx context.Context, permissionSetId stri
 	return deleteResp, nil
 }
 
+func (cl *Client) PermissionSetAssignmentList(ctx context.Context, permissionSetId string, params *permissionssetsmodels.ListPermissionSetAssignmentsParams) (*permissionssetsclient.ListPermissionSetAssignmentsResponse, error) {
+
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	readResp, err := cl.permissionSetsClient.ListPermissionSetAssignmentsWithResponse(ctx, psetId, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, readResp, string(readResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return readResp, nil
+}
+
+func (cl *Client) PermissionSetAssignmentCreate(ctx context.Context, permissionSetId string, params permissionssetsmodels.CreateAssignmentsRequest) (*permissionssetsclient.CreatePermissionSetAssignmentsResponse, error) {
+
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	readResp, err := cl.permissionSetsClient.CreatePermissionSetAssignmentsWithResponse(ctx, psetId, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if readResp.StatusCode() != http.StatusOK {
+		// TODO: split out each of the error types by status code
+		return nil, fmt.Errorf("request failed, returned non 200 status: %s", readResp.Status())
+	}
+
+	return readResp, nil
+}
+
+func (cl *Client) PermissionSetAssignmentDelete(ctx context.Context, permissionSetId string, assignmentId string) (*permissionssetsclient.DeletePermissionSetAssignmentResponse, error) {
+	psetId, err := uuid.Parse(permissionSetId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	assignId, err := uuid.Parse(assignmentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	deleteResp, err := cl.permissionSetsClient.DeletePermissionSetAssignmentWithResponse(ctx, psetId, assignId, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if deleteResp.StatusCode() != http.StatusOK {
+		// TODO: split out each of the error types by status code
+		return nil, fmt.Errorf("request failed, returned non 200 status: %s", deleteResp.Status())
+	}
+
+	return deleteResp, nil
+}
+
 //	MonitorTask polls an asynchronous task and returns the final task response.
 //
 // It uses a TaskPoller to poll the TasksReadTask API endpoint for the status of the task.
@@ -849,7 +919,7 @@ func (cl *Client) MonitorTask(ctx context.Context, taskID string, callbackFunc f
 		return nil, ErrMissingTaskCallbackFunc
 	}
 
-	tp := helpers.NewTaskPoller(taskID, func() (*client.TasksReadTaskResp, error) {
+	tp := helpers.NewTaskPoller(func() (*client.TasksReadTaskResp, error) {
 		return cl.client.TasksReadTaskWithResponse(ctx, taskID, cl.authRequestSigner)
 	})
 
@@ -876,6 +946,61 @@ func (cl *Client) MonitorTask(ctx context.Context, taskID string, callbackFunc f
 	}
 
 	return tp.Resp(), nil
+}
+
+func (cl *Client) MonitorPermissionSetAssignments(ctx context.Context, permissionSetID, assignmentID string, completionStatuses []permissionssetsmodels.AssignmentRecordStatus, params *permissionssetsmodels.ListPermissionSetAssignmentsParams, callbackFunc func(context.Context, *permissionssetsclient.ListPermissionSetAssignmentsResponse) bool) (*permissionssetsclient.ListPermissionSetAssignmentsResponse, error) {
+	if permissionSetID == "" || assignmentID == "" {
+		return nil, errors.New("missing permissionSetID or assignmentID")
+	}
+
+	// callback function used to report interim status events
+	if callbackFunc == nil {
+		return nil, errors.New("missing assignment monitoring callback function")
+	}
+
+	psetId, err := uuid.Parse(permissionSetID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse permission set id: %w", err)
+	}
+
+	tp := helpers.NewTaskPoller(func() (*permissionssetsclient.ListPermissionSetAssignmentsResponse, error) {
+		return cl.permissionSetsClient.ListPermissionSetAssignmentsWithResponse(ctx, psetId, params, cl.authRequestSigner)
+	})
+
+	// loop for until deadline or
+	for tp.Poll(ctx) {
+
+		// the task poller checks the request success/failure so this result is always 200 OK
+		taskRes := tp.Resp()
+
+		// check whether it is OK to continue polling
+		if ok := callbackFunc(ctx, taskRes); !ok {
+			break
+		}
+
+		if isAssignmentComplete(assignmentID, completionStatuses, taskRes.JSON200.Assignments) {
+			break
+		}
+
+		time.Sleep(10 * time.Second) // TODO: check some timeout
+	}
+
+	if err := tp.Err(); err != nil {
+		return nil, fmt.Errorf("task failed: %w", err)
+	}
+
+	return tp.Resp(), nil
+
+}
+
+func isAssignmentComplete(assignmentID string, completionStatuses []permissionssetsmodels.AssignmentRecordStatus, assignments []permissionssetsmodels.AssignmentRecord) bool {
+	for _, assignment := range assignments {
+		if assignment.Id.String() == assignmentID {
+			return slices.Contains(completionStatuses, assignment.Status)
+		}
+	}
+
+	return false
 }
 
 func isTaskComplete(status models.OperationStatus) bool {
