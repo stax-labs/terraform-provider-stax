@@ -231,17 +231,21 @@ func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 	}
 
 	if c.client == nil {
-		c.client, err = client.NewClientWithResponses(installationURLs.CoreAPIEndpointURL, client.WithHTTPClient(c.httpClient), client.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
+		coreClient, err := client.NewClientWithResponses(installationURLs.CoreAPIEndpointURL, client.WithHTTPClient(c.httpClient), client.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
 		if err != nil {
 			return nil, err
 		}
+
+		c.client = coreClient
 	}
 
 	if c.permissionSetsClient == nil {
-		c.permissionSetsClient, err = permissionssetsclient.NewClientWithResponses(installationURLs.PermissionSetsEndpointURL, permissionssetsclient.WithHTTPClient(c.httpClient), permissionssetsclient.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
+		permissionSetsClient, err := permissionssetsclient.NewClientWithResponses(installationURLs.PermissionSetsEndpointURL, permissionssetsclient.WithHTTPClient(c.httpClient), permissionssetsclient.WithRequestEditorFn(buildUserAgentRequestEditor(c.userAgentVersion)))
 		if err != nil {
 			return nil, err
 		}
+
+		c.permissionSetsClient = permissionSetsClient
 	}
 
 	return c, nil
@@ -253,10 +257,12 @@ func (cl *Client) Authenticate(ctx context.Context) error {
 		return err
 	}
 
-	cl.authRequestSigner, err = apigw.RequestSigner(authResponse.AWSConfig.Region, auth.AWSCredentialsRetrieverFn(authResponse.AWSConfig)), nil
+	authRequestSigner, err := apigw.RequestSigner(authResponse.AWSConfig.Region, auth.AWSCredentialsRetrieverFn(authResponse.AWSConfig)), nil
 	if err != nil {
 		return err
 	}
+
+	cl.authRequestSigner = authRequestSigner
 
 	return nil
 }
