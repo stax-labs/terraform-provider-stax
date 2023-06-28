@@ -21,7 +21,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/stretchr/testify v1.8.4
 	github.com/valyala/fasttemplate v1.2.2
-	github.com/vektra/mockery/v2 v2.30.1
+	github.com/vektra/mockery/v2 v2.30.16
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
 
