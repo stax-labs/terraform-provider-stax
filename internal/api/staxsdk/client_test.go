@@ -487,8 +487,8 @@ func TestGetInstallationCoreAPIURL(t *testing.T) {
 		},
 		{
 			name:                 "Endpoint URL configured",
-			overrideEndpointURLs: installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://example.com"},
-			want:                 &installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://example.com"},
+			overrideEndpointURLs: installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://idam.example.com"},
+			want:                 &installationURLs{CoreAPIEndpointURL: "https://example.com", PermissionSetsEndpointURL: "https://idam.example.com"},
 			wantErr:              false,
 		},
 	}

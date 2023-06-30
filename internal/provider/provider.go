@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
@@ -103,7 +104,7 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 
 	if testEndpointURL := os.Getenv("INTEGRATION_TEST_ENDPOINT_URL"); testEndpointURL != "" {
-		client, err := staxsdk.NewClient(&auth.APIToken{}, staxsdk.WithEndpointURL(testEndpointURL), staxsdk.WithPermissionSetsEndpointURL(testEndpointURL), staxsdk.WithAuthRequestSigner(func(ctx context.Context, req *http.Request) error {
+		client, err := staxsdk.NewClient(ctx, &auth.APIToken{}, staxsdk.WithEndpointURL(testEndpointURL), staxsdk.WithPermissionSetsEndpointURL(testEndpointURL), staxsdk.WithAuthRequestSigner(func(ctx context.Context, req *http.Request) error {
 			return nil
 		}))
 		if err != nil {
@@ -117,7 +118,7 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	installationOpt := resolveEndpointConfiguration(data, resp)
+	installationOpt := resolveEndpointConfiguration(ctx, data, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -128,6 +129,7 @@ func (p *StaxProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 
 	client, err := staxsdk.NewClient(
+		ctx,
 		apiToken,
 		append(installationOpt, staxsdk.WithUserAgentVersion(fmt.Sprintf("terraform-provider-stax/%s", p.version)))...,
 	)
@@ -166,10 +168,15 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 	}
 }
 
-func resolveEndpointConfiguration(data StaxProviderModel, resp *provider.ConfigureResponse) []staxsdk.ClientOption {
+func resolveEndpointConfiguration(ctx context.Context, data StaxProviderModel, resp *provider.ConfigureResponse) []staxsdk.ClientOption {
 
 	// if an endpoint is configured use it
 	if !data.EndpointURL.IsNull() && !data.PermissionSetsEndpointURL.IsNull() {
+		tflog.Info(ctx, "endpoint", map[string]interface{}{
+			"EndpointURL":               data.EndpointURL.ValueString(),
+			"PermissionSetsEndpointURL": data.PermissionSetsEndpointURL.ValueString(),
+		})
+
 		return []staxsdk.ClientOption{
 			staxsdk.WithEndpointURL(data.EndpointURL.ValueString()),
 			staxsdk.WithPermissionSetsEndpointURL(data.PermissionSetsEndpointURL.ValueString()),

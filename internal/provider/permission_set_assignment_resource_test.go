@@ -25,12 +25,7 @@ func TestPermissionSetAssignmentResource(t *testing.T) {
 	si.On("CreatePermissionSetAssignments", mock.AnythingOfType("*echo.context"), uuid.MustParse(permissionSetID)).
 		Return(func(c echo.Context, permissionSetId uuid.UUID) error {
 			return c.JSON(200, &models.AssignmentRecords{
-				{
-					Id:            uuid.MustParse(permissionSetAssignmentID),
-					GroupId:       uuid.MustParse(groupID),
-					AccountTypeId: uuid.MustParse(accountTypeID),
-					Status:        models.DEPLOYMENTINPROGRESS,
-				},
+				newAssignmentRecord(permissionSetAssignmentID, groupID, accountTypeID, models.DEPLOYMENTINPROGRESS),
 			})
 		})
 
@@ -38,12 +33,7 @@ func TestPermissionSetAssignmentResource(t *testing.T) {
 		Return(func(c echo.Context, permissionSetId uuid.UUID, params models.ListPermissionSetAssignmentsParams) error {
 			return c.JSON(200, &models.ListAssignmentRecords{
 				Assignments: []models.AssignmentRecord{
-					{
-						Id:            uuid.MustParse(permissionSetAssignmentID),
-						GroupId:       uuid.MustParse(groupID),
-						AccountTypeId: uuid.MustParse(accountTypeID),
-						Status:        models.DEPLOYMENTCOMPLETE,
-					},
+					newAssignmentRecord(permissionSetAssignmentID, groupID, accountTypeID, models.DEPLOYMENTCOMPLETE),
 				},
 			})
 		}).Once()
@@ -62,12 +52,7 @@ func TestPermissionSetAssignmentResource(t *testing.T) {
 		Return(func(c echo.Context, permissionSetId uuid.UUID, params models.ListPermissionSetAssignmentsParams) error {
 			return c.JSON(200, &models.ListAssignmentRecords{
 				Assignments: []models.AssignmentRecord{
-					{
-						Id:            uuid.MustParse(permissionSetAssignmentID),
-						GroupId:       uuid.MustParse(groupID),
-						AccountTypeId: uuid.MustParse(accountTypeID),
-						Status:        models.DELETECOMPLETE,
-					},
+					newAssignmentRecord(permissionSetAssignmentID, groupID, accountTypeID, models.DELETECOMPLETE),
 				},
 			})
 		})
@@ -113,4 +98,13 @@ resource "stax_permission_set_assignment" "${label}" {
 			"group_id":          group_id,
 		},
 	)
+}
+
+func newAssignmentRecord(permissionSetAssignmentID, groupID, accountTypeID string, status models.AssignmentRecordStatus) models.AssignmentRecord {
+	return models.AssignmentRecord{
+		Id:            uuid.MustParse(permissionSetAssignmentID),
+		GroupId:       uuid.MustParse(groupID),
+		AccountTypeId: uuid.MustParse(accountTypeID),
+		Status:        status,
+	}
 }

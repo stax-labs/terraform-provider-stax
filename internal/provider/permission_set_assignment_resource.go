@@ -166,6 +166,10 @@ func (r *PermissionSetAssignmentResource) Create(ctx context.Context, req resour
 		return
 	}
 
+	for _, assignment := range lastResponse.JSON200.Assignments {
+		assignmentAPIToTFResource(assignment, data)
+	}
+
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
