@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -207,7 +206,7 @@ type Client struct {
 // - WithAuthRequestSigner: Sets the request signer used to sign API Gateway requests.
 // - WithUserAgentVersion: Sets the user agent version used in requests.
 // - WithHttpClient: Sets the HTTP client used to make requests.
-func NewClient(apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
+func NewClient(ctx context.Context, apiToken *auth.APIToken, opts ...ClientOption) (*Client, error) {
 	c := &Client{
 		apiToken:         apiToken,
 		authFn:           auth.AuthAPIToken,
@@ -796,12 +795,14 @@ func (cl *Client) PermissionSetsCreate(ctx context.Context, params permissionsse
 		return nil, err
 	}
 
-	if createResp.StatusCode() != http.StatusCreated {
-		// TODO: split out each of the error types by status code
-		return nil, fmt.Errorf("request failed, returned non 201 status: %s", createResp.Status())
+	switch createResp.StatusCode() {
+	case http.StatusCreated:
+		return createResp, nil
+	case http.StatusBadRequest:
+		return nil, fmt.Errorf("request failed, returned non 201 status: %s, code: %d, message: %s", createResp.Status(), createResp.JSON400.Error.Code, createResp.JSON400.Error.Message)
 	}
 
-	return createResp, nil
+	return nil, fmt.Errorf("request failed, returned non 201 status: %s", createResp.Status())
 }
 
 func (cl *Client) PermissionSetsUpdate(ctx context.Context, permissionSetId string, params permissionssetsmodels.UpdatePermissionSetRecord) (*permissionssetsclient.UpdatePermissionSetResponse, error) {
@@ -1035,7 +1036,7 @@ type installationURLs struct {
 }
 
 func getInstallationURL(installation string, overrideEndpointURLs installationURLs) (*installationURLs, error) {
-	if !reflect.ValueOf(overrideEndpointURLs).IsZero() {
+	if overrideEndpointURLs.CoreAPIEndpointURL != "" && overrideEndpointURLs.PermissionSetsEndpointURL != "" {
 		return &overrideEndpointURLs, nil
 	}
 
