@@ -17,7 +17,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/hashicorp/terraform-plugin-go v0.17.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/stretchr/testify v1.8.4
 	github.com/valyala/fasttemplate v1.2.2
