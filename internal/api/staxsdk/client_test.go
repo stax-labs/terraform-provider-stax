@@ -219,6 +219,42 @@ func TestClient_GroupUpdate(t *testing.T) {
 	assert.Equal(&models.TeamsUpdateGroupEvent{}, updateResp.JSON200)
 }
 
+func TestClient_GroupUpdate_AddMembers(t *testing.T) {
+	assert := require.New(t)
+	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"
+
+	addMemberUserIDs := []string{
+		"95319c06-db97-481d-b355-7ff093d0c867",
+		"18bd55b8-4785-41f8-b6df-d682eefd89b7",
+	}
+
+	testClient, clientWithResponsesMock := NewTestClient(t)
+
+	clientWithResponsesMock.On("TeamsUpdateGroupMembersWithResponse",
+		mock.AnythingOfType("*context.emptyCtx"),
+		models.TeamsUpdateGroupMembers{
+			AddMembers: &[]models.UserGroupMemberMap{
+				{
+					GroupId: groupId,
+					UserId:  addMemberUserIDs[0],
+				},
+				{
+					GroupId: groupId,
+					UserId:  addMemberUserIDs[1],
+				},
+			},
+		},
+		mock.AnythingOfType("client.RequestEditorFn"),
+	).Return(&client.TeamsUpdateGroupMembersResp{
+		JSON200:      &models.TeamsUpdateGroupMembersEvent{},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil)
+
+	updateResp, err := testClient.GroupAssignUsers(context.TODO(), groupId, addMemberUserIDs, nil)
+	assert.NoError(err)
+	assert.Equal(&models.TeamsUpdateGroupMembersEvent{}, updateResp.JSON200)
+}
+
 func TestClient_GroupDelete(t *testing.T) {
 	assert := require.New(t)
 	groupId := "b549185e-0fd7-44cf-a7b5-0751c720c0f0"

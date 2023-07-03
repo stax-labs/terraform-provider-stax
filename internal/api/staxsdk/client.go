@@ -89,6 +89,7 @@ type ClientInterface interface {
 	GroupReadByID(ctx context.Context, groupID string) (*client.TeamsReadGroupResp, error)
 	//  GroupRead reads groups and returns a client.TeamsReadGroupsResp.
 	GroupRead(ctx context.Context, groupIDs []string) (*client.TeamsReadGroupsResp, error)
+	GroupAssignUsers(ctx context.Context, groupID string, addMemberUserIDs []string, removeMemberUserIDs []string) (*client.TeamsUpdateGroupMembersResp, error)
 	//  PermissionSetsList lists permission sets and returns a permissionssetsclient.ListPermissionSetsResponse.
 	PermissionSetsList(ctx context.Context, params *permissionssetsmodels.ListPermissionSetsParams) (*permissionssetsclient.ListPermissionSetsResponse, error)
 	//  PermissionSetsReadByID reads a permission set by ID and returns a permissionssetsclient.GetPermissionSetResponse.
@@ -693,6 +694,48 @@ func (cl *Client) GroupRead(ctx context.Context, groupIDs []string) (*client.Tea
 	}
 
 	return teamsReadResp, nil
+}
+
+func (cl *Client) GroupAssignUsers(ctx context.Context, groupID string, addMemberUserIDs []string, removeMemberUserIDs []string) (*client.TeamsUpdateGroupMembersResp, error) {
+	params := models.TeamsUpdateGroupMembers{
+		AddMembers:    userGroupMemberMap(groupID, addMemberUserIDs),
+		RemoveMembers: userGroupMemberMap(groupID, removeMemberUserIDs),
+	}
+
+	updateMembersResp, err := cl.client.TeamsUpdateGroupMembersWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	switch updateMembersResp.StatusCode() {
+	case http.StatusOK:
+		return updateMembersResp, nil
+	case http.StatusBadRequest:
+		return nil, fmt.Errorf("request failed, returned non 200 status: %s error: %s", updateMembersResp.Status(), aws.ToString(updateMembersResp.JSON400.Error))
+	}
+
+	return nil, fmt.Errorf("request failed, returned non 200 status: %s", updateMembersResp.Status())
+}
+
+func userGroupMemberMap(groupID string, userIDs []string) *[]models.UserGroupMemberMap {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	addUsersMap := []models.UserGroupMemberMap{}
+
+	for _, userId := range userIDs {
+		addUsersMap = append(addUsersMap, models.UserGroupMemberMap{
+			GroupId: groupID,
+			UserId:  userId,
+		})
+	}
+
+	if len(addUsersMap) > 0 {
+		return &addUsersMap
+	}
+
+	return nil
 }
 
 func (cl *Client) GroupCreate(ctx context.Context, name string) (*client.TeamsCreateGroupResp, error) {

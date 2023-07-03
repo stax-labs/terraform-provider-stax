@@ -153,6 +153,7 @@ func (p *StaxProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewAccountResource,
 		NewAccountTypeResource,
 		NewGroupResource,
+		NewGroupMembershipResource,
 		NewPermissionSetResource,
 		NewPermissionSetAssignmentResource,
 	}

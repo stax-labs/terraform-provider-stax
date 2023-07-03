@@ -51,6 +51,7 @@ The provider can also be configured using the equivalent environment variables a
 | APIToken |
 | User | 
 | Group | ✅ | ✅
+| GroupMembership | ✅ |
 | NetworkHub |
 | Workload |
 | Workload Manifest |
