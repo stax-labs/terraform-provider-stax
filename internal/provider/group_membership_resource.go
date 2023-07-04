@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -26,7 +26,7 @@ var _ resource.ResourceWithImportState = &GroupMembershipResource{}
 
 type GroupMembershipResourceModel struct {
 	ID       types.String `tfsdk:"id"`
-	UsersIDs types.List   `tfsdk:"user_ids"`
+	UsersIDs types.Set    `tfsdk:"user_ids"`
 }
 
 func NewGroupMembershipResource() resource.Resource {
@@ -51,12 +51,12 @@ func (r *GroupMembershipResource) Schema(ctx context.Context, req resource.Schem
 				Required:            true,
 				MarkdownDescription: "Group identifier",
 			},
-			"user_ids": schema.ListAttribute{
+			"user_ids": schema.SetAttribute{
 				MarkdownDescription: "Array of IDs of Stax Users belonging to the Group",
 				ElementType:         types.StringType,
 				Optional:            true,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
 		},
@@ -254,11 +254,11 @@ func (r *GroupMembershipResource) readGroup(ctx context.Context, groupID string,
 			slices.Sort(*group.Users)
 		}
 
-		groupList, d := types.ListValueFrom(ctx, types.StringType, group.Users)
+		usersList, d := types.SetValueFrom(ctx, types.StringType, group.Users)
 		diags.Append(d...)
 
 		data.ID = types.StringValue(*group.Id)
-		data.UsersIDs = groupList
+		data.UsersIDs = usersList
 	}
 
 	return diags

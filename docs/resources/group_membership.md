@@ -38,4 +38,4 @@ resource "stax_group_membership" "cost-data-scientist" {
 
 ### Optional
 
-- `user_ids` (List of String) Array of IDs of Stax Users belonging to the Group
+- `user_ids` (Set of String) Array of IDs of Stax Users belonging to the Group
