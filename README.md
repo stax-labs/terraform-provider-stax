@@ -49,7 +49,7 @@ The provider can also be configured using the equivalent environment variables a
 | Permission Set Assignment | ✅ | ✅
 | Policies |
 | APIToken |
-| User | 
+| User | ✅ | ✅
 | Group | ✅ | ✅
 | GroupMembership | ✅ |
 | NetworkHub |

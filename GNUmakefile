@@ -19,7 +19,12 @@ datasource-stax_accounts:
 datasource-stax_account_types:
 	terraform -chdir=examples/data-sources/stax_account_types plan -var="account_type_id=$(ACCOUNT_TYPE_ID)"
 
-# Run example stax_account_types datasource
+# Run example stax_users datasource
+.PHONY: datasource-stax_users
+datasource-stax_users:
+	terraform -chdir=examples/data-sources/stax_users plan -var="user_id=$(USER_ID)"
+
+# Run example stax_groups datasource
 .PHONY: datasource-stax_groups
 datasource-stax_groups:
 	terraform -chdir=examples/data-sources/stax_groups plan -var="group_id=$(GROUP_ID)"
