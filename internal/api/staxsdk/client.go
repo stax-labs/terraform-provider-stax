@@ -79,6 +79,11 @@ type ClientInterface interface {
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
 	// WorkloadDelete deletes a workload and returns a client.WorkloadsDeleteWorkloadResp.
 	WorkloadDelete(ctx context.Context, workloadID string) (*client.WorkloadsDeleteWorkloadResp, error)
+	UserReadByID(ctx context.Context, userID string) (*client.TeamsReadUserResp, error)
+	UserRead(ctx context.Context, userIDs []string) (*client.TeamsReadUsersResp, error)
+	UserCreate(ctx context.Context, params models.TeamsCreateUser) (*client.TeamsCreateUserResp, error)
+	UserUpdate(ctx context.Context, userID string, params models.TeamsUpdateUser) (*client.TeamsUpdateUserResp, error)
+	UserDelete(ctx context.Context, userID string) (*client.TeamsDeleteUserResp, error)
 	// GroupCreate create a group and returns a client.TeamsCreateGroupResp.
 	GroupCreate(ctx context.Context, name string) (*client.TeamsCreateGroupResp, error)
 	//  GroupUpdate updates a group and returns a client.TeamsUpdateGroupResp.
@@ -643,6 +648,82 @@ func (cl *Client) WorkloadDelete(ctx context.Context, workloadID string) (*clien
 	return workloadDeleteResp, nil
 }
 
+func (cl *Client) UserReadByID(ctx context.Context, userID string) (*client.TeamsReadUserResp, error) {
+	userReadResp, err := cl.client.TeamsReadUserWithResponse(ctx, userID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if userReadResp.StatusCode() == 404 {
+		return nil, fmt.Errorf("user not found for identifier: %s", userID)
+	}
+
+	err = checkResponse(ctx, userReadResp, string(userReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return userReadResp, nil
+}
+
+func (cl *Client) UserRead(ctx context.Context, userIDs []string) (*client.TeamsReadUsersResp, error) {
+	usersReadResp, err := cl.client.TeamsReadUsersWithResponse(ctx, &models.TeamsReadUsersParams{
+		IdFilter: helpers.CommaDelimitedOptionalValue(userIDs),
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, usersReadResp, string(usersReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return usersReadResp, nil
+}
+
+func (cl *Client) UserCreate(ctx context.Context, params models.TeamsCreateUser) (*client.TeamsCreateUserResp, error) {
+	createUserResp, err := cl.client.TeamsCreateUserWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, createUserResp, string(createUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return createUserResp, nil
+}
+
+func (cl *Client) UserUpdate(ctx context.Context, userID string, params models.TeamsUpdateUser) (*client.TeamsUpdateUserResp, error) {
+	updateUserResp, err := cl.client.TeamsUpdateUserWithResponse(ctx, userID, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, updateUserResp, string(updateUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return updateUserResp, nil
+}
+
+func (cl *Client) UserDelete(ctx context.Context, userID string) (*client.TeamsDeleteUserResp, error) {
+	deleteUserResp, err := cl.client.TeamsDeleteUserWithResponse(ctx, userID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, deleteUserResp, string(deleteUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return deleteUserResp, nil
+}
+
 //	GroupReadByID reads a group by ID from STAX.
 //
 // ctx is the context to use for this request.
@@ -782,20 +863,6 @@ func (cl *Client) GroupDelete(ctx context.Context, groupID string) (*client.Team
 	}
 
 	return deleteGroupResp, nil
-}
-
-func (cl *Client) UserCreate(ctx context.Context, params models.TeamsCreateUser) (*client.TeamsCreateUserResp, error) {
-	createUserResp, err := cl.client.TeamsCreateUserWithResponse(ctx, params, cl.authRequestSigner)
-	if err != nil {
-		return nil, err
-	}
-
-	err = checkResponse(ctx, createUserResp, string(createUserResp.Body))
-	if err != nil {
-		return nil, err
-	}
-
-	return createUserResp, nil
 }
 
 func (cl *Client) PermissionSetsReadByID(ctx context.Context, permissionSetId string) (*permissionssetsclient.GetPermissionSetResponse, error) {

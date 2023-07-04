@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -152,6 +153,7 @@ func (p *StaxProvider) Resources(ctx context.Context) []func() resource.Resource
 	return []func() resource.Resource{
 		NewAccountResource,
 		NewAccountTypeResource,
+		NewUserResource,
 		NewGroupResource,
 		NewGroupMembershipResource,
 		NewPermissionSetResource,
@@ -164,6 +166,7 @@ func (p *StaxProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewAccountsDataSource,
 		NewAccountTypesDataSource,
 		NewGroupsDataSource,
+		NewUsersDataSource,
 		NewPermissionSetsDataSource,
 		NewPermissionSetAssignmentsDataSource,
 	}
@@ -245,4 +248,14 @@ func New(version string) func() provider.Provider {
 			version: version,
 		}
 	}
+}
+
+func timeToStringPtr(ts *time.Time) *string {
+	if ts == nil {
+		return nil
+	}
+
+	s := (*ts).Format(time.RFC3339)
+
+	return &s
 }

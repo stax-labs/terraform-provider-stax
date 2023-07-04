@@ -195,13 +195,3 @@ func assignmentAPIToTF(assignment models.AssignmentRecord) PermissionSetAssignme
 		LastModifiedTS: types.StringPointerValue(timeToStringPtr(assignment.ModifiedTS)),
 	}
 }
-
-func timeToStringPtr(ts *time.Time) *string {
-	if ts == nil {
-		return nil
-	}
-
-	s := (*ts).Format(time.RFC3339)
-
-	return &s
-}
