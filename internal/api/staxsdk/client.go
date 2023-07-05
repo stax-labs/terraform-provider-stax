@@ -77,6 +77,8 @@ type ClientInterface interface {
 	AccountTypeReadById(ctx context.Context, accountTypeID string) (*client.AccountsReadAccountTypeResp, error)
 	// AccountTypeRead reads account types and returns a client.AccountsReadAccountTypesResp.
 	AccountTypeRead(ctx context.Context, accountTypeIDs []string) (*client.AccountsReadAccountTypesResp, error)
+	WorkloadManifestReadByID(ctx context.Context, versionID string) (*client.WorkloadsReadCatalogueManifestResp, error)
+	WorkloadItemReadByID(ctx context.Context, catalogID string, params *models.WorkloadsReadCatalogueItemParams) (*client.WorkloadsReadCatalogueItemResp, error)
 	// WorkloadCreate creates a workload and returns a client.WorkloadsCreateWorkloadResp.
 	WorkloadCreate(ctx context.Context, createWorkload models.WorkloadsCreateWorkload) (*client.WorkloadsCreateWorkloadResp, error)
 	// WorkloadReadByID reads workload by id and returns a client.WorkloadsReadWorkloadResp.
@@ -588,6 +590,62 @@ func (cl *Client) AccountTypeDelete(ctx context.Context, accountTypeID string) (
 	}
 
 	return accountTypeDeleteResp, nil
+}
+
+func (cl *Client) WorkloadManifestReadByID(ctx context.Context, versionID string) (*client.WorkloadsReadCatalogueManifestResp, error) {
+	workloadsReadResp, err := cl.client.WorkloadsReadCatalogueManifestWithResponse(ctx, versionID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsReadResp, string(workloadsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsReadResp, nil
+}
+
+func (cl *Client) WorkloadItemReadByID(ctx context.Context, catalogID string, params *models.WorkloadsReadCatalogueItemParams) (*client.WorkloadsReadCatalogueItemResp, error) {
+	workloadsReadResp, err := cl.client.WorkloadsReadCatalogueItemWithResponse(ctx, catalogID, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsReadResp, string(workloadsReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsReadResp, nil
+}
+
+func (cl *Client) WorkloadManifestCreate(ctx context.Context, params models.WorkloadsCreateCatalogueItem) (*client.WorkloadsCreateCatalogueItemResp, error) {
+	workloadsCreateResp, err := cl.client.WorkloadsCreateCatalogueItemWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsCreateResp, string(workloadsCreateResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsCreateResp, nil
+}
+
+func (cl *Client) WorkloadManifestUpdate(ctx context.Context, catalogueId string, params models.WorkloadsCreateCatalogueVersion) (*client.WorkloadsCreateCatalogueVersionResp, error) {
+	workloadsUpdateResp, err := cl.client.WorkloadsCreateCatalogueVersionWithResponse(ctx, catalogueId, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, workloadsUpdateResp, string(workloadsUpdateResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return workloadsUpdateResp, nil
 }
 
 //	WorkloadCreate creates a new workload in STAX.

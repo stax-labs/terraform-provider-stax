@@ -26,12 +26,13 @@ type WorkloadsDataSource struct {
 }
 
 type WorkloadDataSourceModel struct {
-	ID        types.String `tfsdk:"id"`
-	Name      types.String `tfsdk:"name"`
-	AccountID types.String `tfsdk:"account_id"`
-	CatalogID types.String `tfsdk:"catalog_id"`
-	Region    types.String `tfsdk:"region"`
-	Status    types.String `tfsdk:"status"`
+	ID               types.String `tfsdk:"id"`
+	Name             types.String `tfsdk:"name"`
+	AccountID        types.String `tfsdk:"account_id"`
+	CatalogID        types.String `tfsdk:"catalog_id"`
+	CatalogVersionID types.String `tfsdk:"catalog_version_id"`
+	Region           types.String `tfsdk:"region"`
+	Status           types.String `tfsdk:"status"`
 }
 
 // WorkloadsDataSourceModel describes the data source data model.
@@ -86,6 +87,10 @@ func (d *WorkloadsDataSource) Schema(ctx context.Context, req datasource.SchemaR
 						},
 						"catalog_id": schema.StringAttribute{
 							MarkdownDescription: "The workload catalog identifier for the used by the workload",
+							Computed:            true,
+						},
+						"catalog_version_id": schema.StringAttribute{
+							MarkdownDescription: "The workload catalog version identifier for the used by the workload",
 							Computed:            true,
 						},
 						"region": schema.StringAttribute{
@@ -152,12 +157,13 @@ func (d *WorkloadsDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	for _, workload := range workloadsResp.JSON200.Workloads {
 		data.Workloads = append(data.Workloads, WorkloadDataSourceModel{
-			ID:        types.StringValue(aws.ToString(workload.Id)),
-			Name:      types.StringValue(workload.Name),
-			AccountID: types.StringValue(workload.AccountId),
-			CatalogID: types.StringValue(workload.CatalogueId),
-			Region:    types.StringValue(workload.Region),
-			Status:    types.StringPointerValue((*string)(workload.Status)),
+			ID:               types.StringValue(aws.ToString(workload.Id)),
+			Name:             types.StringValue(workload.Name),
+			AccountID:        types.StringValue(workload.AccountId),
+			CatalogID:        types.StringValue(workload.CatalogueId),
+			Region:           types.StringValue(workload.Region),
+			Status:           types.StringPointerValue((*string)(workload.Status)),
+			CatalogVersionID: types.StringPointerValue((*string)(workload.CatalogueVersionId)),
 		})
 	}
 

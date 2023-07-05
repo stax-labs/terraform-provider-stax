@@ -88,7 +88,7 @@ func (r *WorkloadResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 			"region": schema.StringAttribute{
 				MarkdownDescription: "The AWS region where the hosting the workload",
-				Required:            true,
+				Optional:            true,
 			},
 			"tags": schema.MapAttribute{
 				MarkdownDescription: "Workload tags, these are applied to any cloudformation stacks provisioned as a part of this workload",
@@ -295,8 +295,33 @@ func (r *WorkloadResource) readWorkload(ctx context.Context, workloadID string, 
 			diags.Append(d...)
 		}
 
-		if workload.Parameters != nil {
-			data.Parameters, d = flattenWorkloadParameter(ctx, workload.Parameters)
+		workloadManifest, err := r.client.WorkloadItemReadByID(ctx, workload.CatalogueId, &models.WorkloadsReadCatalogueItemParams{
+			IncludeParameters: aws.Bool(true),
+			IncludeVersions:   aws.Bool(true),
+		})
+		if err != nil {
+			diags.AddError("Client Error", fmt.Sprintf("Unable to read workload catalog version id=%s, got error: %s", aws.ToString(workload.CatalogueVersionId), err))
+			return diags
+		}
+
+		var catalogVersion models.WorkloadCatalogueVersion
+		for _, catalog := range workloadManifest.JSON200.WorkloadCatalogues {
+			for _, item := range catalog.WorkloadCatalogueItems {
+				for _, version := range *item.Versions {
+					if aws.ToString(version.Id) == aws.ToString(workload.CatalogueVersionId) {
+						catalogVersion = version
+					}
+				}
+			}
+		}
+
+		tflog.Info(ctx, "reading workloads", map[string]interface{}{
+			"parameters": *catalogVersion.Parameters,
+			"outputs":    *catalogVersion.Outputs,
+		})
+
+		if catalogVersion.Parameters != nil {
+			data.Parameters, d = flattenWorkloadParameter(ctx, *catalogVersion.Parameters)
 			diags.Append(d...)
 		}
 	}
@@ -318,7 +343,7 @@ func flattenTags(ctx context.Context, tags *models.Tags) (types.Map, diag.Diagno
 	return types.MapValueFrom(ctx, types.StringType, accountTags)
 }
 
-func flattenWorkloadParameter(_ context.Context, apiObject *models.Parameter) (types.Set, diag.Diagnostics) {
+func flattenWorkloadParameter(_ context.Context, apiObject []models.Parameter) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	elemType := types.ObjectType{AttrTypes: workloadParameterAttrTypes}
 
@@ -327,22 +352,25 @@ func flattenWorkloadParameter(_ context.Context, apiObject *models.Parameter) (t
 	}
 
 	elems := []attr.Value{}
-	for k, v := range *apiObject {
+	for _, param := range apiObject {
 
-		val, ok := v.(string)
+		k, ok := param["Key"].(string)
 		if !ok {
 			diags.AddAttributeError(path.Root("parameters"), "conversion failed for parameter", fmt.Sprintf("failed to convert parameter value to string for key: %s", k))
 			continue // skip this parameter
 		}
 
+		val := convertVal(param["Value"])
+
 		obj := map[string]attr.Value{
 			"key":   types.StringValue(k),
-			"value": types.StringValue(val),
+			"value": types.StringPointerValue(val),
 		}
 		objVal, d := types.ObjectValue(workloadParameterAttrTypes, obj)
 		diags.Append(d...)
 
 		elems = append(elems, objVal)
+		// }
 	}
 	setVal, d := types.SetValue(elemType, elems)
 	diags.Append(d...)
@@ -370,4 +398,13 @@ func expandParameter(ctx context.Context, parametersSet types.Set) (*[]models.Ke
 	}
 
 	return &keyValueRequestParameters, diags
+}
+
+func convertVal(in any) *string {
+	val, ok := in.(string)
+	if !ok {
+		return nil
+	}
+
+	return &val
 }
