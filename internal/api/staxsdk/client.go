@@ -84,6 +84,11 @@ type ClientInterface interface {
 	UserCreate(ctx context.Context, params models.TeamsCreateUser) (*client.TeamsCreateUserResp, error)
 	UserUpdate(ctx context.Context, userID string, params models.TeamsUpdateUser) (*client.TeamsUpdateUserResp, error)
 	UserDelete(ctx context.Context, userID string) (*client.TeamsDeleteUserResp, error)
+	APITokenReadByID(ctx context.Context, userID string) (*client.TeamsReadApiTokenResp, error)
+	APITokenRead(ctx context.Context, apiTokenIDs []string) (*client.TeamsReadApiTokensResp, error)
+	APITokenCreate(ctx context.Context, params models.TeamsCreateApiToken) (*client.TeamsCreateApiTokenResp, error)
+	ApiTokenUpdate(ctx context.Context, apiTokenID string, params models.TeamsUpdateApiToken) (*client.TeamsUpdateApiTokenResp, error)
+	ApiTokenDelete(ctx context.Context, apiTokenID string) (*client.TeamsDeleteApiTokenResp, error)
 	// GroupCreate create a group and returns a client.TeamsCreateGroupResp.
 	GroupCreate(ctx context.Context, name string) (*client.TeamsCreateGroupResp, error)
 	//  GroupUpdate updates a group and returns a client.TeamsUpdateGroupResp.
@@ -712,6 +717,82 @@ func (cl *Client) UserUpdate(ctx context.Context, userID string, params models.T
 
 func (cl *Client) UserDelete(ctx context.Context, userID string) (*client.TeamsDeleteUserResp, error) {
 	deleteUserResp, err := cl.client.TeamsDeleteUserWithResponse(ctx, userID, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, deleteUserResp, string(deleteUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return deleteUserResp, nil
+}
+
+func (cl *Client) APITokenReadByID(ctx context.Context, apiTokenID string) (*client.TeamsReadApiTokenResp, error) {
+	userReadResp, err := cl.client.TeamsReadApiTokenWithResponse(ctx, apiTokenID, &models.TeamsReadApiTokenParams{}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	if userReadResp.StatusCode() == 404 {
+		return nil, fmt.Errorf("api token not found for identifier: %s", apiTokenID)
+	}
+
+	err = checkResponse(ctx, userReadResp, string(userReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return userReadResp, nil
+}
+
+func (cl *Client) APITokenRead(ctx context.Context, apiTokenIDs []string) (*client.TeamsReadApiTokensResp, error) {
+	userReadResp, err := cl.client.TeamsReadApiTokensWithResponse(ctx, &models.TeamsReadApiTokensParams{
+		IdFilter: helpers.CommaDelimitedOptionalValue(apiTokenIDs),
+	}, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, userReadResp, string(userReadResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return userReadResp, nil
+}
+
+func (cl *Client) APITokenCreate(ctx context.Context, params models.TeamsCreateApiToken) (*client.TeamsCreateApiTokenResp, error) {
+	createUserResp, err := cl.client.TeamsCreateApiTokenWithResponse(ctx, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, createUserResp, string(createUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return createUserResp, nil
+}
+
+func (cl *Client) ApiTokenUpdate(ctx context.Context, apiTokenID string, params models.TeamsUpdateApiToken) (*client.TeamsUpdateApiTokenResp, error) {
+	updateUserResp, err := cl.client.TeamsUpdateApiTokenWithResponse(ctx, apiTokenID, params, cl.authRequestSigner)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkResponse(ctx, updateUserResp, string(updateUserResp.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	return updateUserResp, nil
+}
+
+func (cl *Client) ApiTokenDelete(ctx context.Context, apiTokenID string) (*client.TeamsDeleteApiTokenResp, error) {
+	deleteUserResp, err := cl.client.TeamsDeleteApiTokenWithResponse(ctx, apiTokenID, cl.authRequestSigner)
 	if err != nil {
 		return nil, err
 	}

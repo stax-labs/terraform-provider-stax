@@ -47,14 +47,10 @@ The provider can also be configured using the equivalent environment variables a
 | AccountType | ✅ | ✅
 | Permission Set | ✅ | ✅
 | Permission Set Assignment | ✅ | ✅
-| Policies |
-| APIToken |
+| APIToken | ✅ | ✅
 | User | ✅ | ✅
 | Group | ✅ | ✅
 | GroupMembership | ✅ |
-| NetworkHub |
-| Workload |
-| Workload Manifest |
 
 # Limitations 
 
