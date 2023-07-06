@@ -24,6 +24,11 @@ datasource-stax_account_types:
 datasource-stax_users:
 	terraform -chdir=examples/data-sources/stax_users plan -var="user_id=$(USER_ID)"
 
+# Run example stax_api_tokens datasource
+.PHONY: datasource-stax_api_tokens
+datasource-stax_api_tokens:
+	terraform -chdir=examples/data-sources/stax_api_tokens plan -var="api_token_id=$(API_TOKEN_ID)"
+
 # Run example stax_groups datasource
 .PHONY: datasource-stax_groups
 datasource-stax_groups:
