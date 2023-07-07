@@ -3,12 +3,12 @@
 page_title: "stax_account_type Resource - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Account Type resource
+  Account Type resource. Stax Account Types https://support.stax.io/hc/en-us/articles/4454028359567-Manage-Account-Types to group your accounts and apply Permission Sets.
 ---
 
 # stax_account_type (Resource)
 
-Account Type resource
+Account Type resource. [Stax Account Types](https://support.stax.io/hc/en-us/articles/4454028359567-Manage-Account-Types) to group your accounts and apply Permission Sets.
 
 ## Example Usage
 
@@ -28,9 +28,9 @@ resource "stax_account_type" "production" {
 
 ### Required
 
-- `name` (String) The name of the account type
+- `name` (String) The name of the stax account type
 
 ### Read-Only
 
-- `id` (String) Account type identifier
+- `id` (String) Account Type identifier
 - `status` (String) The status of the stax account type

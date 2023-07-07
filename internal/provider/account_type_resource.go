@@ -41,18 +41,18 @@ func (r *AccountTypeResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *AccountTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Account Type resource",
+		MarkdownDescription: "Account Type resource. [Stax Account Types](https://support.stax.io/hc/en-us/articles/4454028359567-Manage-Account-Types) to group your accounts and apply Permission Sets.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Account type identifier",
+				MarkdownDescription: "Account Type identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the account type",
+				MarkdownDescription: "The name of the stax account type",
 				Required:            true,
 			},
 			"status": schema.StringAttribute{

@@ -49,7 +49,7 @@ func (r *AccountResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *AccountResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Account resource",
+		MarkdownDescription: "Account resource. [Stax Accounts](https://support.stax.io/hc/en-us/articles/4453778959503-About-Accounts) allows you to securely and easily create, view and centrally manage your AWS Accounts and get started deploying applications.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -60,18 +60,18 @@ func (r *AccountResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the account",
+				MarkdownDescription: "The name of the stax account",
 				Required:            true,
 			},
 			"account_type_id": schema.StringAttribute{
-				MarkdownDescription: "The account type identifier for the account",
+				MarkdownDescription: "The account type identifier for the stax account",
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"account_type": schema.StringAttribute{
-				MarkdownDescription: "The account type for the account",
+				MarkdownDescription: "The account type for the stax account",
 				Computed:            true,
 			},
 			"status": schema.StringAttribute{
@@ -87,7 +87,7 @@ func (r *AccountResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Optional:            true,
 			},
 			"tags": schema.MapAttribute{
-				MarkdownDescription: "Account tags",
+				MarkdownDescription: "The tags associated with the stax account",
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
