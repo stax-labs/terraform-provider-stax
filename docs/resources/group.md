@@ -3,12 +3,12 @@
 page_title: "stax_group Resource - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Stax Group resource
+  Stax Group resource. Stax Groups https://support.stax.io/hc/en-us/articles/4445008125455-Manage-Groups govern access to AWS accounts managed by Stax
 ---
 
 # stax_group (Resource)
 
-Stax Group resource
+Stax Group resource. [Stax Groups](https://support.stax.io/hc/en-us/articles/4445008125455-Manage-Groups) govern access to AWS accounts managed by Stax
 
 ## Example Usage
 

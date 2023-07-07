@@ -53,7 +53,7 @@ func (r *UserResource) Metadata(ctx context.Context, req resource.MetadataReques
 
 func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stax User resource",
+		MarkdownDescription: "Stax User resource. [Stax Users](https://support.stax.io/hc/en-us/articles/4445031773711-Manage-Users) allows you to manage users details for non federated logins.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

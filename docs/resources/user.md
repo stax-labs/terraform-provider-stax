@@ -3,12 +3,12 @@
 page_title: "stax_user Resource - terraform-provider-stax"
 subcategory: ""
 description: |-
-  Stax User resource
+  Stax User resource. Stax Users https://support.stax.io/hc/en-us/articles/4445031773711-Manage-Users allows you to manage users details for non federated logins.
 ---
 
 # stax_user (Resource)
 
-Stax User resource
+Stax User resource. [Stax Users](https://support.stax.io/hc/en-us/articles/4445031773711-Manage-Users) allows you to manage users details for non federated logins.
 
 ## Example Usage
 

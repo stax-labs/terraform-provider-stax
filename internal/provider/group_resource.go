@@ -41,7 +41,7 @@ func (r *GroupResource) Metadata(ctx context.Context, req resource.MetadataReque
 
 func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stax Group resource",
+		MarkdownDescription: "Stax Group resource. [Stax Groups](https://support.stax.io/hc/en-us/articles/4445008125455-Manage-Groups) govern access to AWS accounts managed by Stax",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
