@@ -300,10 +300,7 @@ func (r *AccountResource) readAccount(ctx context.Context, accountID string, dat
 		data.Name = types.StringValue(account.Name)
 		data.Status = types.StringValue(string(*account.Status))
 		data.AWsAccountID = types.StringValue(aws.ToString(account.AwsAccountId))
-
-		if account.AwsAccountAlias != nil {
-			data.AwsAccountAlias = types.StringValue(aws.ToString(account.AwsAccountAlias))
-		}
+		data.AwsAccountAlias = types.StringPointerValue(account.AwsAccountAlias)
 
 		tags := staxTagsToMapString(account.Tags)
 		if len(tags) > 0 {
