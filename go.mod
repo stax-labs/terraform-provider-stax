@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.29
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.28
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.15.14
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.22.12
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.23.0
 	github.com/aws/smithy-go v1.13.5
 	github.com/deepmap/oapi-codegen v1.13.0
 	github.com/google/uuid v1.3.0
