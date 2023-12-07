@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/deepmap/oapi-codegen/pkg/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/labstack/echo/v4"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/mocks"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/server"
@@ -21,7 +21,7 @@ func TestUserResource(t *testing.T) {
 
 	userID := "87c570e2-c795-44b0-aefa-ebdcffd4d048"
 	taskID := "fd4d3cbc-1ba0-4d21-be4b-b63ffe3af4f1"
-	email := types.Email("prod@example.com")
+	email := openapi_types.Email("prod@example.com")
 	role := models.Role("customer_readonly")
 
 	si := mocks.NewServerInterface(t)

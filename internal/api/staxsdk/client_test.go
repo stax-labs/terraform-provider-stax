@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 	"github.com/google/uuid"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/auth/cognito"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/client"

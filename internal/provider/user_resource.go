@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -17,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/openapi/core/models"
 	"github.com/stax-labs/terraform-provider-stax/internal/api/staxsdk"
 )
