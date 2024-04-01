@@ -4,15 +4,15 @@ go 1.20
 
 require (
 	github.com/alexrudd/cognito-srp/v4 v4.1.0
-	github.com/aws/aws-sdk-go-v2 v1.23.5
+	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/aws/aws-sdk-go-v2/config v1.25.12
 	github.com/aws/aws-sdk-go-v2/credentials v1.16.10
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.21.3
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.23.5
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.31.3
-	github.com/aws/smithy-go v1.18.1
+	github.com/aws/smithy-go v1.20.2
 	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/google/uuid v1.4.0
-	github.com/hashicorp/terraform-plugin-docs v0.16.0
+	github.com/hashicorp/terraform-plugin-docs v0.4.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-go v0.19.1
@@ -36,8 +36,8 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.9 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.5 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.5 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.8 // indirect
