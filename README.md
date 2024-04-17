@@ -120,6 +120,6 @@ For more information on contributing the to the Stax Go SDK, please see our [gui
 
 # Getting Help
 
-* If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/developer/api-tokens/).<br>
-* If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/terraform-provider-stax/issues).<br>
+* If you're having trouble using the Stax SDK, please refer to our [documentation](https://support.stax.io/hc/en-us/articles/4447453523343-Using-the-Stax-API).
+* If you've encountered an issue or found a bug, please [open an issue](https://support.stax.io/hc/en-us/articles/4443377429647-Raise-a-Support-Case). Please include [trace-level logs](https://support.hashicorp.com/hc/en-us/articles/360001113727-Enabling-trace-level-logs-in-Terraform-CLI-Cloud-or-Enterprise) where possible.
 * For any other requests, please contact [Stax support](mailto:support@stax.io).
