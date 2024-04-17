@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production    
     steps:
-      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017 # v4.0.0
+      - uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017 # v4.1.2
         with:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
