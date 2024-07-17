@@ -2,7 +2,7 @@
 
 This is the official Terraform provider for [Stax](https://www.stax.io/). 
 
-**Please Note: The Stax Terraform Provider is currently in Developer Preview and is intended strictly for feedback purposes only. Do not use this provider for production workloads.**
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
 
 # Usage
 
