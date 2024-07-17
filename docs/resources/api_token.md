@@ -10,8 +10,6 @@ description: |-
 
 Provides a Stax API Token resource. [Stax API Token](https://support.stax.io/hc/en-us/articles/4447315161231-About-API-Tokens) are security credentials that can be used to authenticate to the Stax API. Stax will create and store them securely in a customers security AWS account using [Systems Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 
-**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
-
 ## Example Usage
 
 ```terraform

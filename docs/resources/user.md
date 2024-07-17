@@ -10,8 +10,6 @@ description: |-
 
 Stax User resource. [Stax Users](https://support.stax.io/hc/en-us/articles/4445031773711-Manage-Users) allows you to manage users details for non federated logins.
 
-**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
-
 ## Example Usage
 
 ```terraform
