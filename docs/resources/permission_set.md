@@ -10,6 +10,8 @@ description: |-
 
 Provides a Stax Permission Set resource. [Permission Sets](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets) allow customers to define their own AWS Access permissions, to which AWS accounts they apply and the groups of users who are subsequently granted access.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Example Usage
 
 ```terraform

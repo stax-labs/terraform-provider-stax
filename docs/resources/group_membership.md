@@ -10,6 +10,8 @@ description: |-
 
 Stax Group Membership resource
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Example Usage
 
 ```terraform

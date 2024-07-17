@@ -10,6 +10,8 @@ description: |-
 
 Account resource. [Stax Accounts](https://support.stax.io/hc/en-us/articles/4453778959503-About-Accounts) allows you to securely and easily create, view and centrally manage your AWS Accounts and get started deploying applications.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Example Usage
 
 ```terraform

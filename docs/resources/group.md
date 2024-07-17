@@ -10,6 +10,8 @@ description: |-
 
 Stax Group resource. [Stax Groups](https://support.stax.io/hc/en-us/articles/4445008125455-Manage-Groups) govern access to AWS accounts managed by Stax
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Example Usage
 
 ```terraform

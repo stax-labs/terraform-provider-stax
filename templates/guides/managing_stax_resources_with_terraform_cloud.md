@@ -10,6 +10,8 @@ description: A Guide to managing Stax Resources with Terraform Cloud
 
 Before you begin you should read through the [Get Started - Terraform Cloud](https://developer.hashicorp.com/terraform/tutorials/cloud-get-started) provided by hashicorp, this will familiarize you with the basics of Terraform Cloud.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 # Initial project setup
 
 Before running Terraform, you'll need to:

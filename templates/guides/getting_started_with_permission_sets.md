@@ -8,6 +8,8 @@ description: A Getting Started with Permission Sets Guide
 
 Permission Sets are a feature of Stax, this guide was written to provide a walk through illustrating how they can be managed using terraform. Customers are encouraged to read through the [Stax Permission Sets documentation](https://support.stax.io/hc/en-us/articles/4453967433359-Permission-Sets) first.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Create a Permission Set
 
 The following terraform code will create a new permission named `phoenix-project-access` which is using the AWS Managed Policy `job-function/DataScientist`. Stax team recommends wherever possible customers should use the AWS Managed Policies.
