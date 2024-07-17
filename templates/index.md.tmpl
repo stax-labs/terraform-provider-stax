@@ -9,6 +9,8 @@ description: |-
 
 The Stax terraform provider is used to interact with resources supported by Stax.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Getting Started
 
 If your new to terraform then the hashicorp developer site has a great guide to getting up and running [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) with AWS.

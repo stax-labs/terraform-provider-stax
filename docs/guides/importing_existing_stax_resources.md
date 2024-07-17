@@ -10,6 +10,8 @@ One of the most common workflows when starting to manage Stax resources with Ter
 
 This guide will walk through importing a [Stax Account](https://support.stax.io/hc/en-us/articles/4453778959503-About-Accounts) as an example.
 
+**Please Note: The Stax Terraform Provider is no longer in Developer Preview and is now deprecated. Do not use this provider for production workloads.**
+
 ## Importing an Account
 
 With the release of [Terraform 1.5](https://www.hashicorp.com/blog/terraform-1-5-brings-config-driven-import-and-checks) Terraform introduced config-driven import. This means you can import resources by defining a block in configuration first.
